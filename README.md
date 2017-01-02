@@ -20,11 +20,33 @@ Provides sample implementations using the [Polly library](https://www.github.com
 + Demo 08 adds Polly v5.0 `Fallback`, making the call protected (in a PolicyWrap) by a Fallback, Retry, Circuitbreaker. 
 + Demo 09 shows the Polly v5.0 `Timeout` policy for an overall call timeout, in combination with `Fallback` and `WaitAndRetry`.
 
+## Bulkhead isolation demos
+
+### Background
+
+The bulkhead isolation demos place calls against two different imaginary endpoints on a downstream server:
+
++ The **good** endpoint returns results in a timely manner
++ The **faulting** endpoint simulates a faulting downstream system: it does respond, but only after a long delay.
++ (_Note_: Unlike the other demos, there is no throttling rejection of the caller.)
+
+### Sequence
+
+In all bulkhead demos, the upstream system makes a random mixture of calls to the **good** and **faulting** endpoints.
+
++ In Demo 00 there is **no bulkhead isolation**.  
+  + Sooner or later, the **faulting stream of calls saturates** all resource in the caller, starving the calls to the **good** endpoint of resource too.   
+  + Watch how the the calls to the **good** endpoint eventually start backing up too (watch the 'pending' count climb), as the faulting stream starves the whole system of resource.
++ In demo 01, the calls to **faulting** and **good** endpoints are **isolated by bulkhead isolation**.  
+  + The faulting stream of calls still backs up.
+  + But **the calls to the good endpoint are unaffected - they consistently succeed**, because they are isolated in a separate bulkhead.   
+
 ## To run the demos
 
 + To start the dummy server, start `PollyTestApp`.  
 + Be sure the port number for the dummy server in `PollyTestClient\Configuration.cs` matches the port on which `PollyTestApp` has started on your machine (in the previous step).
 + To run a demo, uncomment the demo you wish to run in `PollyTestClient\program.cs`.  Then start `PollyTestClient`.  
++ Many Polly policies are about handling exceptions.  If running the demos in debug mode out of Visual Studio and flow is interrupted by Visual Studio breaking on exceptions, consider unchecking the box "Break when this exception type is user-unhandled" in the dialog shown when Visual Studio breaks on an exception.
 
 ## Want further information?
 
@@ -34,4 +56,4 @@ Provides sample implementations using the [Polly library](https://www.github.com
 
 ## Slide deck from DevIntersections presentation
 
-View the [slides presented](https://github.com/App-vNext/Polly-Samples/blob/master/Demo-Slides.pdf) at the April 2016 DevIntersections Polly demo by Carl Franklin.
+View the [slides presented](AppvNext-DotNetFoundation-Polly-DemoSlides-October-2016-generic.pptx) at DevIntersections in October 2016.  You are welcome to use and adapt this presentation for not-for-profit presentations of Polly to co-workers, user groups and similar, subject to the condition that references to the .NET Foundation and App-vNext are retained.
