@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{69789838-8A79-4D0D-9723-8C0A8435E802}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PollyTestClient</RootNamespace>
     <AssemblyName>PollyTestClient</AssemblyName>
@@ -57,7 +57,6 @@
     <Compile Include="Output\ConsoleColorHelper.cs" />
     <Compile Include="Output\DemoProgress.cs" />
     <Compile Include="Output\Statistic.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Samples\Async\AsyncDemo00_NoPolicy.cs" />
     <Compile Include="Samples\Async\AsyncDemo01_RetryNTimes.cs" />
@@ -81,10 +80,8 @@
     <Compile Include="Samples\Sync\Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
     <Compile Include="Samples\Sync\Demo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
     <Compile Include="Samples\Sync\Demo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
-    
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

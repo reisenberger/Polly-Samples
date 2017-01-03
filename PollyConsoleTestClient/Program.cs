@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 using PollyTestClient.Output;
 using PollyTestClient.Samples.Sync;
 using PollyTestClient.Samples.Async;
 
-namespace PollyTestClient
+namespace PollyConsoleTestClient
 {
     class Program
     {
@@ -41,7 +40,7 @@ namespace PollyTestClient
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Synchronous demos
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             //Demo00_NoPolicy.Execute(cancellationToken, progress);
             //Demo01_RetryNTimes.Execute(cancellationToken, progress);
