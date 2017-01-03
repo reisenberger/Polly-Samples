@@ -18,14 +18,14 @@ namespace PollyDemos.Async
     /// Imagine if lots of clients were doing that simultaneously
     ///  - could just increase load on an already-struggling server!
     /// </summary>
-    public class AsyncDemo04_WaitAndRetryForever
+    public class AsyncDemo04_WaitAndRetryForever : AsyncDemo
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -88,7 +88,7 @@ namespace PollyDemos.Async
             }
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses),
@@ -96,14 +96,5 @@ namespace PollyDemos.Async
             new Statistic("Requests which eventually failed", eventualFailures),
         };
 
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
     }
 }

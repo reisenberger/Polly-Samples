@@ -21,7 +21,7 @@ namespace PollyDemos.Async
     /// The operation is identical to Demo06.  
     /// The code demonstrates how using the PolicyWrap makes your combined-Policy-strategy more concise, at the point of execution.
     /// </summary>
-    public class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
+    public class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap : AsyncDemo
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -29,7 +29,7 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
-        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -130,7 +130,7 @@ namespace PollyDemos.Async
             }
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses),
@@ -139,14 +139,5 @@ namespace PollyDemos.Async
             new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons),
         };
 
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
     }
 }

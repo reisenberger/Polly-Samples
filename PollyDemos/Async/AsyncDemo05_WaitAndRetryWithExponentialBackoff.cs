@@ -20,14 +20,14 @@ namespace PollyDemos.Async
     /// ... What if the underlying system was totally down tho?  
     /// ... Keeping trying forever would be counterproductive (so, see Demo06)
     /// </summary>
-    public class AsyncDemo05_WaitAndRetryWithExponentialBackoff
+    public class AsyncDemo05_WaitAndRetryWithExponentialBackoff : AsyncDemo
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -91,7 +91,7 @@ namespace PollyDemos.Async
             }
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses),
@@ -99,14 +99,5 @@ namespace PollyDemos.Async
             new Statistic("Requests which eventually failed", eventualFailures),
         };
 
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
     }
 }

@@ -51,7 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Async\AsyncDemo.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="DemoBase.cs" />
     <Compile Include="OutputHelpers\Color.cs" />
     <Compile Include="OutputHelpers\ColoredMessage.cs" />
     <Compile Include="OutputHelpers\DemoProgress.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Sync\Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
     <Compile Include="Sync\Demo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
     <Compile Include="Sync\Demo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
+    <Compile Include="Sync\SyncDemo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

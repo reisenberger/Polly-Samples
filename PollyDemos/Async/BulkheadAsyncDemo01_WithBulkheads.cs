@@ -28,7 +28,7 @@ namespace PollyDemos.Async
     /// 
     /// Bulkheads: making sure one fault doesn't sink the whole ship!
     /// </summary>
-    public class BulkheadAsyncDemo01_WithBulkheads
+    public class BulkheadAsyncDemo01_WithBulkheads : AsyncDemo
     {
 
         // Track the number of 'good' and 'faulting' requests made, succeeded and failed.
@@ -41,7 +41,7 @@ namespace PollyDemos.Async
         static int faultingRequestsSucceeded = 0;
         static int faultingRequestsFailed = 0;
 
-        public async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
         {
             if (externalCancellationToken == null) throw new ArgumentNullException(nameof(externalCancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -166,7 +166,7 @@ namespace PollyDemos.Async
             bulkheadForGoodCalls.Dispose();
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests, Color.White),
             new Statistic("Good endpoint: requested", goodRequestsMade, Color.White),
@@ -178,16 +178,7 @@ namespace PollyDemos.Async
             new Statistic("Faulting endpoint: pending", faultingRequestsMade-faultingRequestsSucceeded-faultingRequestsFailed, Color.Yellow),
             new Statistic("Faulting endpoint: failed", faultingRequestsFailed, Color.Red),
         };
-
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
+        
 
     }
 }

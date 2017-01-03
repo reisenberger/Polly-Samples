@@ -10,14 +10,14 @@ namespace PollyDemos.Sync
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// </summary>
-    public class Demo00_NoPolicy
+    public class Demo00_NoPolicy : SyncDemo
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -62,7 +62,7 @@ namespace PollyDemos.Sync
             }
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses),
@@ -70,14 +70,5 @@ namespace PollyDemos.Sync
             new Statistic("Requests which eventually failed", eventualFailures),
         };
 
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
     }
 }

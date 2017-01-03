@@ -24,7 +24,7 @@ namespace PollyDemos.Sync
     /// - a fallback policy then provides substitute message for the user
     /// - otherwise similar to demo08.
     /// </summary>
-    public class Demo09_Wrap_Fallback_Timeout_WaitAndRetry
+    public class Demo09_Wrap_Fallback_Timeout_WaitAndRetry : SyncDemo
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -32,7 +32,7 @@ namespace PollyDemos.Sync
         private static int eventualFailuresDueToTimeout;
         private static int eventualFailuresForOtherReasons;
 
-        public void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -130,7 +130,7 @@ namespace PollyDemos.Sync
 
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses),
@@ -139,14 +139,5 @@ namespace PollyDemos.Sync
             new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons),
         };
 
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
     }
 }

@@ -24,7 +24,7 @@ namespace PollyDemos.Async
     /// - onFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
     /// - also demonstrates how you can use the same kind of policy (Fallback in this case) twice (or more) in a wrap.
     /// </summary>
-    public class AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker
+    public class AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker : AsyncDemo
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -32,7 +32,7 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
-        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -84,6 +84,7 @@ namespace PollyDemos.Async
                     fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [Fallback for broken circuit]",
                     onFallbackAsync: async b =>
                     {
+                        await Task.FromResult(true);
                         watch.Stop();
                         progress.Report(ProgressWithMessage("Fallback catches failed with: " + b.Exception.Message
                             + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
@@ -97,11 +98,13 @@ namespace PollyDemos.Async
                 .FallbackAsync(
                     fallbackAction: /* Demonstrates fallback action/func syntax */ async ct =>
                     {
+                        await Task.FromResult(true);
                         /* do something else async if desired */
                         return "Please try again later [Fallback for any exception]";
                     },
                     onFallbackAsync: async e =>
                     {
+                        await Task.FromResult(true);
                         watch.Stop();
                         progress.Report(ProgressWithMessage("Fallback catches eventually failed with: " + e.Exception.Message
                             + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
@@ -152,7 +155,7 @@ namespace PollyDemos.Async
             }
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses),
@@ -160,16 +163,6 @@ namespace PollyDemos.Async
             new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking),
             new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons),
         };
-
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
 
     }
 }

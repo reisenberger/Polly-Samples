@@ -24,7 +24,7 @@ namespace PollyDemos.Async
     /// - a fallback policy then provides substitute message for the user
     /// - otherwise similar to demo08.
     /// </summary>
-    public class AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry
+    public class AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry : AsyncDemo
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -32,7 +32,7 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToTimeout;
         private static int eventualFailuresForOtherReasons;
 
-        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
@@ -73,6 +73,7 @@ namespace PollyDemos.Async
                     fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [Fallback for timeout]",
                     onFallbackAsync: async b =>
                     {
+                        await Task.FromResult(true);
                         watch.Stop();
                         progress.Report(ProgressWithMessage("Fallback catches failed with: " + b.Exception.Message + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
                         eventualFailuresDueToTimeout++;
@@ -85,11 +86,13 @@ namespace PollyDemos.Async
                 .FallbackAsync(
                     fallbackAction: /* Demonstrates fallback action/func syntax */ async ct =>
                     {
+                        await Task.FromResult(true); 
                         /* do something else async if desired */
                         return "Please try again later [Fallback for any exception]";
                     },
                     onFallbackAsync: async e =>
                     {
+                        await Task.FromResult(true);
                         watch.Stop();
                         progress.Report(ProgressWithMessage("Fallback catches eventually failed with: " + e.Exception.Message + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
                         eventualFailuresForOtherReasons++;
@@ -132,7 +135,7 @@ namespace PollyDemos.Async
 
         }
 
-        public static Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses),
@@ -141,14 +144,5 @@ namespace PollyDemos.Async
             new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons),
         };
 
-        public static DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
-
-        public static DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
     }
 }
