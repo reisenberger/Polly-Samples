@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using PollyTestClient.Output;
 
 namespace PollyTestClient.Samples
 {
@@ -20,18 +21,24 @@ namespace PollyTestClient.Samples
     /// </summary>
     public static class AsyncDemo02_WaitAndRetryNTimes
     {
-        public static async Task ExecuteAsync(CancellationToken cancellationToken)
+        private static int totalRequests;
+        private static int eventualSuccesses;
+        private static int retries;
+        private static int eventualFailures;
+
+        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            Console.WriteLine(typeof(AsyncDemo02_WaitAndRetryNTimes).Name);
-            Console.WriteLine("=======");
+            if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
+            if (progress == null) throw new ArgumentNullException(nameof(progress));
 
-            // Let's call a web api service to make repeated requests to a server. 
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            eventualSuccesses = 0;
+            retries = 0;
+            eventualFailures = 0;
 
-            var client = new HttpClient();
-            int eventualSuccesses = 0;
-            int retries = 0;
-            int eventualFailures = 0;
+            progress.Report(ProgressWithMessage(typeof(AsyncDemo02_WaitAndRetryNTimes).Name));
+            progress.Report(ProgressWithMessage("======"));
+            progress.Report(ProgressWithMessage(String.Empty));
+
             // Define our policy:
             var policy = Policy.Handle<Exception>().WaitAndRetryAsync(
                 retryCount: 3, // Retry 3 times
@@ -40,16 +47,18 @@ namespace PollyTestClient.Samples
             {
                 // This is your new exception handler! 
                 // Tell the user what they've won!
-                ConsoleHelper.WriteLineInColor("Policy logging: " + exception.Message, ConsoleColor.Yellow);
+                progress.Report(ProgressWithMessage("Policy logging: " + exception.Message, Color.Yellow));
                 retries++;
 
             });
 
-            int i = 0;
+            var client = new HttpClient();
+
+            totalRequests = 0;
             // Do the following until a key is pressed
             while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
             {
-                i++;
+                totalRequests++;
 
                 try
                 {
@@ -59,16 +68,16 @@ namespace PollyTestClient.Samples
                         // This code is executed within the Policy 
 
                         // Make a request and get a response
-                        string msg = await client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + i);
+                        string msg = await client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
 
                         // Display the response message on the console
-                        ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
+                        progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
                         eventualSuccesses++;
                     }, cancellationToken);
                 }
                 catch (Exception e)
                 {
-                    ConsoleHelper.WriteLineInColor("Request " + i + " eventually failed with: " + e.Message, ConsoleColor.Red);
+                    progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
                     eventualFailures++;
                 }
 
@@ -76,12 +85,25 @@ namespace PollyTestClient.Samples
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             }
 
-            Console.WriteLine("");
-            Console.WriteLine("Total requests made                 : " + i);
-            Console.WriteLine("Requests which eventually succeeded : " + eventualSuccesses);
-            Console.WriteLine("Retries made to help achieve success: " + retries);
-            Console.WriteLine("Requests which eventually failed    : " + eventualFailures);
-
         }
+
+        public static Statistic[] LatestStatistics => new[]
+        {
+            new Statistic("Total requests made", totalRequests),
+            new Statistic("Requests which eventually succeeded", eventualSuccesses),
+            new Statistic("Retries made to help achieve success", retries),
+            new Statistic("Requests which eventually failed", eventualFailures),
+        };
+
+        public static DemoProgress ProgressWithMessage(string message)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
+        }
+
+        public static DemoProgress ProgressWithMessage(string message, Color color)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
+        }
+
     }
 }

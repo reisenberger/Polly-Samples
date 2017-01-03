@@ -1,12 +1,13 @@
-﻿using Polly;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Polly;
 using Polly.Fallback;
 using Polly.Timeout;
 using Polly.Wrap;
+using PollyTestClient.Output;
 
 namespace PollyTestClient.Samples
 {
@@ -25,18 +26,29 @@ namespace PollyTestClient.Samples
     /// </summary>
     public static class AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry
     {
-        public static async Task ExecuteAsync(CancellationToken cancellationToken)
+        private static int totalRequests;
+        private static int eventualSuccesses;
+        private static int retries;
+        private static int eventualFailuresDueToTimeout;
+        private static int eventualFailuresForOtherReasons;
+
+        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            Console.WriteLine(typeof(AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry).Name);
-            Console.WriteLine("=======");
+            if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
+            if (progress == null) throw new ArgumentNullException(nameof(progress));
+
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
 
-            var client = new HttpClient();
-            int eventualSuccesses = 0;
-            int retries = 0;
-            int eventualFailuresDueToTimeout = 0;
-            int eventualFailuresForOtherReasons = 0;
+            eventualSuccesses = 0;
+            retries = 0;
+            eventualFailuresDueToTimeout = 0;
+            eventualFailuresForOtherReasons = 0;
+
+            progress.Report(ProgressWithMessage(typeof(AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry).Name));
+            progress.Report(ProgressWithMessage("======"));
+            progress.Report(ProgressWithMessage(String.Empty));
+
             Stopwatch watch = null;
 
             // Define our timeout policy: time out after 2 seconds.  We will use the pessimistic timeout strategy, which forces a timeout - even when the underlying delegate doesn't support it.
@@ -50,7 +62,7 @@ namespace PollyTestClient.Samples
                 attempt => TimeSpan.FromSeconds(4),
                 (exception, calculatedWaitDuration) =>
                 {
-                    ConsoleHelper.WriteLineInColor(".Log,then retry: " + exception.Message, ConsoleColor.Yellow);
+                    progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
                     retries++;
                 });
 
@@ -62,8 +74,7 @@ namespace PollyTestClient.Samples
                     onFallbackAsync: async b =>
                     {
                         watch.Stop();
-                        ConsoleHelper.WriteInColor("Fallback catches failed with: " + b.Exception.Message, ConsoleColor.Red);
-                        ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Red);
+                        progress.Report(ProgressWithMessage("Fallback catches failed with: " + b.Exception.Message + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
                         eventualFailuresDueToTimeout++;
                     }
                 );
@@ -80,8 +91,7 @@ namespace PollyTestClient.Samples
                     onFallbackAsync: async e =>
                     {
                         watch.Stop();
-                        ConsoleHelper.WriteInColor("Fallback catches eventually failed with: " + e.Exception.Message, ConsoleColor.Red);
-                        ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Red);
+                        progress.Report(ProgressWithMessage("Fallback catches eventually failed with: " + e.Exception.Message + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
                         eventualFailuresForOtherReasons++;
                     }
                 );
@@ -89,23 +99,23 @@ namespace PollyTestClient.Samples
             // Compared to previous demo08: here we use *instance* wrap syntax, to wrap all in one go.
             PolicyWrap<String> policyWrap = fallbackForAnyException.WrapAsync(fallbackForTimeout).WrapAsync(timeoutPolicy).WrapAsync(waitAndRetryPolicy);
 
-            int i = 0;
+            var client = new HttpClient();
+
+            totalRequests = 0;
             while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
             {
-                i++;
+                totalRequests++;
                 watch = new Stopwatch();
                 watch.Start();
 
                 try
                 {
                     // Manage the call according to the whole policy wrap
-                    string msg = await policyWrap.ExecuteAsync(ct => client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + i), cancellationToken);
+                    string response = await policyWrap.ExecuteAsync(ct => client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests), cancellationToken);
 
                     watch.Stop();
 
-                    // Display the response message on the console
-                    ConsoleHelper.WriteInColor("Response : " + msg, ConsoleColor.Green);
-                    ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Green);
+                    progress.Report(ProgressWithMessage("Response: " + response + "(after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
 
                     eventualSuccesses++;
                 }
@@ -118,13 +128,25 @@ namespace PollyTestClient.Samples
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             }
 
-            Console.WriteLine("");
-            Console.WriteLine("Total requests made                     : " + i);
-            Console.WriteLine("Requests which eventually succeeded     : " + eventualSuccesses);
-            Console.WriteLine("Retries made to help achieve success    : " + retries);
-            Console.WriteLine("Requests timed out by timeout policy    : " + eventualFailuresDueToTimeout); 
-            Console.WriteLine("Requests which failed after longer delay: " + eventualFailuresForOtherReasons);
+        }
 
+        public static Statistic[] LatestStatistics => new[]
+        {
+            new Statistic("Total requests made", totalRequests),
+            new Statistic("Requests which eventually succeeded", eventualSuccesses),
+            new Statistic("Retries made to help achieve success", retries),
+            new Statistic("Requests timed out by timeout policy", eventualFailuresDueToTimeout),
+            new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons),
+        };
+
+        public static DemoProgress ProgressWithMessage(string message)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
+        }
+
+        public static DemoProgress ProgressWithMessage(string message, Color color)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
         }
     }
 }

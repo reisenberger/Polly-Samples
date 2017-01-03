@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
+using PollyTestClient.Output;
 
 namespace PollyTestClient.Samples
 {
@@ -32,6 +33,7 @@ namespace PollyTestClient.Samples
 
         // Track the number of 'good' and 'faulting' requests made, succeeded and failed.
         // At any time, requests pending = made - succeeded - failed.
+        static int totalRequests = 0;
         static int goodRequestsMade = 0;
         static int goodRequestsSucceeded = 0;
         static int goodRequestsFailed = 0;
@@ -39,10 +41,14 @@ namespace PollyTestClient.Samples
         static int faultingRequestsSucceeded = 0;
         static int faultingRequestsFailed = 0;
 
-        public static async Task ExecuteAsync(CancellationToken externalCancellationToken)
+        public static async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
         {
-            Console.WriteLine(typeof(BulkheadAsyncDemo01_WithBulkheads).Name);
-            Console.WriteLine("=======");
+            if (externalCancellationToken == null) throw new ArgumentNullException(nameof(externalCancellationToken));
+            if (progress == null) throw new ArgumentNullException(nameof(progress));
+
+            progress.Report(ProgressWithMessage(typeof(BulkheadAsyncDemo01_WithBulkheads).Name));
+            progress.Report(ProgressWithMessage("======"));
+            progress.Report(ProgressWithMessage(String.Empty));
 
             // Let's imagine this caller has some theoretically limited capacity.
             const int callerParallelCapacity = 8; // (artificially low - but easier to follow, to illustrate principle)
@@ -53,7 +59,7 @@ namespace PollyTestClient.Samples
 
             var client = new HttpClient();
             var rand = new Random();
-            int i = 0;
+            totalRequests = 0;
 
             IList<Task> tasks = new List<Task>();
             CancellationTokenSource internalCancellationTokenSource = new CancellationTokenSource();
@@ -62,11 +68,10 @@ namespace PollyTestClient.Samples
 
             while (!Console.KeyAvailable && !externalCancellationToken.IsCancellationRequested)
             {
-                i++;
+                totalRequests++;
 
                 // Randomly make either 'good' or 'faulting' calls.
                 if (rand.Next(0, 2) == 0)
-                //if (i % 2 == 0)
                 {
                     goodRequestsMade++;
                     tasks.Add(Task.Factory.StartNew(j =>
@@ -79,17 +84,17 @@ namespace PollyTestClient.Samples
                             {
                                 // Make a request and get a response, from the good endpoint
                                 string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledgood/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
-                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
+                                if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
 
                                 goodRequestsSucceeded++;
                             }
                             catch (Exception e)
                             {
-                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Request " + j + " eventually failed with: " + e.Message, ConsoleColor.Red);
+                                if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Request " + j + " eventually failed with: " + e.Message, Color.Red));
 
                                 goodRequestsFailed++;
                             }
-                        }), i, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
+                        }), totalRequests, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
                     );
 
                 }
@@ -106,32 +111,35 @@ namespace PollyTestClient.Samples
                             {
                                 // Make a request and get a response, from the faulting endpoint
                                 string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledfaulting/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
-                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
+                                if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
 
                                 faultingRequestsSucceeded++;
                             }
                             catch (Exception e)
                             {
-                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Request " + j + " eventually failed with: " + e.Message, ConsoleColor.Red);
+                                if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Request " + j + " eventually failed with: " + e.Message, Color.Red));
 
                                 faultingRequestsFailed++;
                             }
-                        }), i, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
+                        }), totalRequests, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
                     );
 
                 }
 
-                OutputState();
+                progress.Report(ProgressWithMessage($"Total requests: requested {totalRequests:00}, ", Color.White)); progress.Report(ProgressWithMessage($"    Good endpoint: requested {goodRequestsMade:00}, ", Color.White));
+                progress.Report(ProgressWithMessage($"Good endpoint:succeeded {goodRequestsSucceeded:00}, ", Color.Green));
+                progress.Report(ProgressWithMessage($"Good endpoint:pending {goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed:00}, ", Color.Yellow));
+                progress.Report(ProgressWithMessage($"Good endpoint:failed {goodRequestsFailed:00}.", Color.Red));
 
+                progress.Report(ProgressWithMessage(String.Empty));
+                progress.Report(ProgressWithMessage($"Faulting endpoint: requested {faultingRequestsMade:00}, ", Color.White));
+                progress.Report(ProgressWithMessage($"Faulting endpoint:succeeded {faultingRequestsSucceeded:00}, ", Color.Green));
+                progress.Report(ProgressWithMessage($"Faulting endpoint:pending {faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed:00}, ", Color.Yellow));
+                progress.Report(ProgressWithMessage($"Faulting endpoint:failed {faultingRequestsFailed:00}.", Color.Red));
+                progress.Report(ProgressWithMessage(String.Empty));
                 // Wait briefly
                 await Task.Delay(TimeSpan.FromSeconds(0.1), externalCancellationToken);
             }   
-
-            Console.WriteLine("");
-            Console.WriteLine("Total requests made                 : " + i);
-            Console.WriteLine("");
-            OutputState();
-            Console.WriteLine("");
 
             // Cancel any unstarted and running tasks.
             internalCancellationTokenSource.Cancel();
@@ -145,19 +153,28 @@ namespace PollyTestClient.Samples
             }
         }
 
-        public static void OutputState()
+        public static Statistic[] LatestStatistics => new[]
         {
-            ConsoleHelper.WriteInColor(String.Format("    Good endpoint: requested {0:00}, ", goodRequestsMade), ConsoleColor.White);
-            ConsoleHelper.WriteInColor(String.Format("succeeded {0:00}, ", goodRequestsSucceeded), ConsoleColor.Green);
-            ConsoleHelper.WriteInColor(String.Format("pending {0:00}, ", goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed), ConsoleColor.Yellow);
-            ConsoleHelper.WriteLineInColor(String.Format("failed {0:00}.", goodRequestsFailed), ConsoleColor.Red);
-            
-            ConsoleHelper.WriteInColor(String.Format("Faulting endpoint: requested {0:00}, ", faultingRequestsMade), ConsoleColor.White);
-            ConsoleHelper.WriteInColor(String.Format("succeeded {0:00}, ", faultingRequestsSucceeded), ConsoleColor.Green);
-            ConsoleHelper.WriteInColor(String.Format("pending {0:00}, ", faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed), ConsoleColor.Yellow);
-            ConsoleHelper.WriteLineInColor(String.Format("failed {0:00}.", faultingRequestsFailed), ConsoleColor.Red);
+            new Statistic("Total requests made", totalRequests, Color.White),
+            new Statistic("Good endpoint: requested", goodRequestsMade, Color.White),
+            new Statistic("Good endpoint: succeeded", goodRequestsSucceeded, Color.Green),
+            new Statistic("Good endpoint: pending", goodRequestsMade-goodRequestsSucceeded-goodRequestsFailed, Color.Yellow),
+            new Statistic("Good endpoint: failed", goodRequestsFailed, Color.Red),
+            new Statistic("Faulting endpoint: requested", faultingRequestsMade, Color.White),
+            new Statistic("Faulting endpoint: succeeded", faultingRequestsSucceeded, Color.Green),
+            new Statistic("Faulting endpoint: pending", faultingRequestsMade-faultingRequestsSucceeded-faultingRequestsFailed, Color.Yellow),
+            new Statistic("Faulting endpoint: failed", faultingRequestsFailed, Color.Red),
+        };
 
-            Console.WriteLine();
+        public static DemoProgress ProgressWithMessage(string message)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
         }
+
+        public static DemoProgress ProgressWithMessage(string message, Color color)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
+        }
+
     }
 }

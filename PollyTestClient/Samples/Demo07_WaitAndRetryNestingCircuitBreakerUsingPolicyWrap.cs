@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 using Polly.Wrap;
+using PollyTestClient.Output;
 
 namespace PollyTestClient.Samples
 {
@@ -23,18 +25,28 @@ namespace PollyTestClient.Samples
     /// </summary>
     public static class Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
     {
-        public static void Execute()
+        private static int totalRequests;
+        private static int eventualSuccesses;
+        private static int retries;
+        private static int eventualFailuresDueToCircuitBreaking;
+        private static int eventualFailuresForOtherReasons;
+
+        public static void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            Console.WriteLine(MethodBase.GetCurrentMethod().DeclaringType.Name);
-            Console.WriteLine("=======");
+            if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
+            if (progress == null) throw new ArgumentNullException(nameof(progress));
+
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
 
-            var client = new WebClient();
-            int eventualSuccesses = 0;
-            int retries = 0;
-            int eventualFailuresDueToCircuitBreaking = 0;
-            int eventualFailuresForOtherReasons = 0;
+            eventualSuccesses = 0;
+            retries = 0;
+            eventualFailuresDueToCircuitBreaking = 0;
+            eventualFailuresForOtherReasons = 0;
+
+            progress.Report(ProgressWithMessage(typeof(Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap).Name));
+            progress.Report(ProgressWithMessage("======"));
+            progress.Report(ProgressWithMessage(String.Empty));
 
             // Define our waitAndRetry policy: keep retrying with 200ms gaps.
             RetryPolicy waitAndRetryPolicy = Policy
@@ -45,7 +57,7 @@ namespace PollyTestClient.Samples
                 {
                     // This is your new exception handler! 
                     // Tell the user what they've won!
-                    ConsoleHelper.WriteLineInColor(".Log,then retry: " + exception.Message, ConsoleColor.Yellow);
+                    progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
                     retries++;
                 });
 
@@ -57,32 +69,34 @@ namespace PollyTestClient.Samples
                     durationOfBreak: TimeSpan.FromSeconds(3),
                     onBreak: (ex, breakDelay) =>
                     {
-                        ConsoleHelper.WriteLineInColor(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!", ConsoleColor.Magenta);
-                        ConsoleHelper.WriteLineInColor("..due to: " + ex.Message, ConsoleColor.Magenta);
+                        progress.Report(ProgressWithMessage(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!", Color.Magenta));
+                        progress.Report(ProgressWithMessage("..due to: " + ex.Message, Color.Magenta));
                     },
-                    onReset: () => ConsoleHelper.WriteLineInColor(".Breaker logging: Call ok! Closed the circuit again!", ConsoleColor.Magenta),
-                    onHalfOpen: () => ConsoleHelper.WriteLineInColor(".Breaker logging: Half-open: Next call is a trial!", ConsoleColor.Magenta)
+                    onReset: () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!", Color.Magenta)),
+                    onHalfOpen: () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta))
                 );
 
             // New for demo07: combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap.
             PolicyWrap policyWrap = Policy.Wrap(waitAndRetryPolicy, circuitBreakerPolicy);
 
-            int i = 0;
+            var client = new WebClient();
+
+            totalRequests = 0;
             // Do the following until a key is pressed
-            while (!Console.KeyAvailable)
+            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
             {
-                i++;
+                totalRequests++;
                 Stopwatch watch = new Stopwatch();
                 watch.Start();
 
                 try
                 {
                     // Retry the following call according to the policy wrap
-                    string msg = policyWrap.Execute<String>(() => 
+                    string response = policyWrap.Execute<String>(() => 
                             {
                                 // This code is executed through both policies in the wrap: WaitAndRetry outer, then CircuitBreaker inner.  Demo 06 shows a broken-out version of what this is equivalent to.
 
-                                return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i);
+                                return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
                             });
 
                     // Without the extra comments in the anonymous method { } above, it could even be as concise as this:
@@ -91,23 +105,27 @@ namespace PollyTestClient.Samples
                     watch.Stop();
 
                     // Display the response message on the console
-                    ConsoleHelper.WriteInColor("Response : " + msg, ConsoleColor.Green);
-                    ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Green);
+                    progress.Report(ProgressWithMessage("Response : " + response
+                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
 
                     eventualSuccesses++;
                 }
                 catch (BrokenCircuitException b)
                 {
                     watch.Stop();
-                    ConsoleHelper.WriteInColor("Request " + i + " failed with: " + b.GetType().Name, ConsoleColor.Red);
-                    ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Red);
+
+                    progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
+                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+
                     eventualFailuresDueToCircuitBreaking++;
                 }
                 catch (Exception e)
                 {
                     watch.Stop();
-                    ConsoleHelper.WriteInColor("Request " + i + " eventually failed with: " + e.Message, ConsoleColor.Red);
-                    ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Red);
+
+                    progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
+                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+
                     eventualFailuresForOtherReasons++;
                 }
 
@@ -115,13 +133,25 @@ namespace PollyTestClient.Samples
                 Thread.Sleep(500);
             }
 
-            Console.WriteLine("");
-            Console.WriteLine("Total requests made                     : " + i);
-            Console.WriteLine("Requests which eventually succeeded     : " + eventualSuccesses);
-            Console.WriteLine("Retries made to help achieve success    : " + retries);
-            Console.WriteLine("Requests failed early by broken circuit : " + eventualFailuresDueToCircuitBreaking);
-            Console.WriteLine("Requests which failed after longer delay: " + eventualFailuresForOtherReasons);
+        }
 
+        public static Statistic[] LatestStatistics => new[]
+        {
+            new Statistic("Total requests made", totalRequests),
+            new Statistic("Requests which eventually succeeded", eventualSuccesses),
+            new Statistic("Retries made to help achieve success", retries),
+            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking),
+            new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons),
+        };
+
+        public static DemoProgress ProgressWithMessage(string message)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
+        }
+
+        public static DemoProgress ProgressWithMessage(string message, Color color)
+        {
+            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
         }
     }
 }

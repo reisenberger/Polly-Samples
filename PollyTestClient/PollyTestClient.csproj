@@ -11,6 +11,7 @@
     <AssemblyName>PollyTestClient</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -51,6 +52,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
+    <Compile Include="Output\Color.cs" />
+    <Compile Include="Output\ColoredMessage.cs" />
+    <Compile Include="Output\ConsoleColorHelper.cs" />
+    <Compile Include="Output\DemoProgress.cs" />
+    <Compile Include="Output\Statistic.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Samples\AsyncDemo00_NoPolicy.cs" />
@@ -65,8 +71,8 @@
     <Compile Include="Samples\AsyncDemo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
     <Compile Include="Samples\BulkheadAsyncDemo00_NoBulkhead.cs" />
     <Compile Include="Samples\BulkheadAsyncDemo01_WithBulkheads.cs" />
-    <Compile Include="Samples\ConsoleHelper.cs" />
     <Compile Include="Samples\Demo00_NoPolicy.cs" />
+    <Compile Include="Samples\Demo01_RetryNTimes.cs" />
     <Compile Include="Samples\Demo02_WaitAndRetryNTimes.cs" />
     <Compile Include="Samples\Demo03_WaitAndRetryNTimes_WithEnoughRetries.cs" />
     <Compile Include="Samples\Demo04_WaitAndRetryForever.cs" />
@@ -75,7 +81,7 @@
     <Compile Include="Samples\Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
     <Compile Include="Samples\Demo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
     <Compile Include="Samples\Demo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
-    <Compile Include="Samples\Demo01_RetryNTimes.cs" />
+    
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
