@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
-using PollyTestClient.Output;
+using PollyTestClient.OutputHelpers;
 
 namespace PollyTestClient.Samples.Sync
 {

@@ -1,4 +1,4 @@
-﻿namespace PollyTestClient.Output
+﻿namespace PollyTestClient.OutputHelpers
 {
     public struct Statistic
     {

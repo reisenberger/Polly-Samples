@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PollyTestClient.Output
+namespace PollyTestClient.OutputHelpers
 {
     public struct ColoredMessage
     {

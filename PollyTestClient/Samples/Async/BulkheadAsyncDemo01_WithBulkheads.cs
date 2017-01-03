@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
-using PollyTestClient.Output;
+using PollyTestClient.OutputHelpers;
 
 namespace PollyTestClient.Samples.Async
 {

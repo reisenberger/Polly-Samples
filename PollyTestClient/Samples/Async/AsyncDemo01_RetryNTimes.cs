@@ -3,7 +3,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using PollyTestClient.Output;
+using PollyTestClient.OutputHelpers;
 
 namespace PollyTestClient.Samples.Async
 {

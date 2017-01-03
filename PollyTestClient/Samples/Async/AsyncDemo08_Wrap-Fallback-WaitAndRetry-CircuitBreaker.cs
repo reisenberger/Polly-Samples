@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Polly.CircuitBreaker;
 using Polly.Fallback;
 using Polly.Wrap;
-using PollyTestClient.Output;
+using PollyTestClient.OutputHelpers;
 
 namespace PollyTestClient.Samples.Async
 {

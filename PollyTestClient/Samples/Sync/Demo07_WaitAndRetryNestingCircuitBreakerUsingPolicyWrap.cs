@@ -6,7 +6,7 @@ using System.Threading;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 using Polly.Wrap;
-using PollyTestClient.Output;
+using PollyTestClient.OutputHelpers;
 
 namespace PollyTestClient.Samples.Sync
 {

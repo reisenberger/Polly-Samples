@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using Polly.CircuitBreaker;
-using PollyTestClient.Output;
+using PollyTestClient.OutputHelpers;
 
 namespace PollyTestClient.Samples.Sync
 {
