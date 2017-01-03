@@ -2,10 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Http;
-using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using Polly.Fallback;
 using Polly.Retry;
 using Polly.Timeout;
@@ -48,7 +45,7 @@ namespace PollyTestClient.Samples.Sync
             eventualFailuresDueToTimeout = 0;
             eventualFailuresForOtherReasons = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry).Name));
+            progress.Report(ProgressWithMessage(typeof(Demo09_Wrap_Fallback_Timeout_WaitAndRetry).Name));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(String.Empty));
 

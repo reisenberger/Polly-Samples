@@ -1,8 +1,6 @@
 ﻿using Polly;
 using System;
-using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using PollyTestClient.Output;
