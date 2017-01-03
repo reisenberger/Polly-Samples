@@ -6,7 +6,7 @@ using PollyTestClient.Output;
 using PollyTestClient.Samples.Sync;
 using PollyTestClient.Samples.Async;
 
-namespace PollyConsoleTestClient
+namespace PollyTestClientConsole
 {
     class Program
     {
