@@ -51,7 +51,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PollyTestClient\PollyTestClient.csproj">
+    <ProjectReference Include="..\PollyDemos\PollyTestClient.csproj">
       <Project>{69789838-8a79-4d0d-9723-8c0a8435e802}</Project>
       <Name>PollyTestClient</Name>
     </ProjectReference>

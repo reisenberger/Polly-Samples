@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyTestApp", "PollyTestApp\PollyTestApp.csproj", "{A0C3DAF0-4F18-4DAB-8A16-8A5C5F6CAEC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyTestClient", "PollyTestClient\PollyTestClient.csproj", "{69789838-8A79-4D0D-9723-8C0A8435E802}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyTestClient", "PollyDemos\PollyTestClient.csproj", "{69789838-8A79-4D0D-9723-8C0A8435E802}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyTestClientConsole", "PollyTestClientConsole\PollyTestClientConsole.csproj", "{A724DE86-8F09-4EF6-BF26-289C28189C53}"
 EndProject
