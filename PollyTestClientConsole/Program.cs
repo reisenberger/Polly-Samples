@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PollyTestClient.OutputHelpers;
-using PollyTestClient.Samples.Sync;
-using PollyTestClient.Samples.Async;
+using PollyDemos.OutputHelpers;
+using PollyDemos.Samples.Sync;
+using PollyDemos.Samples.Async;
 
 namespace PollyTestClientConsole
 {

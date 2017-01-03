@@ -7,9 +7,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
-using PollyTestClient.OutputHelpers;
+using PollyDemos.OutputHelpers;
 
-namespace PollyTestClient.Samples.Async
+namespace PollyDemos.Samples.Async
 {
     /// <summary>
     /// Same scenario as previous demo:

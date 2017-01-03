@@ -3,9 +3,9 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using PollyTestClient.OutputHelpers;
+using PollyDemos.OutputHelpers;
 
-namespace PollyTestClient.Samples.Async
+namespace PollyDemos.Samples.Async
 {
     /// <summary>
     /// Demonstrates WaitAndRetry policy with calculated retry delays to back off.

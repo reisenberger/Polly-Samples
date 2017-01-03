@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
-using PollyTestClient.OutputHelpers;
+using PollyDemos.OutputHelpers;
 
-namespace PollyTestClient.Samples.Sync
+namespace PollyDemos.Samples.Sync
 {
     /// <summary>
     /// Uses no policy.  Demonstrates behaviour of 'faulting server' we are testing against.

@@ -7,8 +7,8 @@
     <ProjectGuid>{69789838-8A79-4D0D-9723-8C0A8435E802}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PollyTestClient</RootNamespace>
-    <AssemblyName>PollyTestClient</AssemblyName>
+    <RootNamespace>PollyDemos</RootNamespace>
+    <AssemblyName>PollyDemos</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
