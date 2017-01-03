@@ -119,35 +119,37 @@ namespace PollyDemos.Sync
             PolicyWrap<String> policyWrap = fallbackForAnyException.Wrap(fallbackForCircuitBreaker.Wrap(myResilienceStrategy));
             // For info: Equivalent to: PolicyWrap<String> policyWrap = Policy.Wrap(fallbackForAnyException, fallbackForCircuitBreaker, waitAndRetryPolicy, circuitBreakerPolicy);
 
-            var client = new WebClient();
-
-            totalRequests = 0;
-            // Do the following until a key is pressed
-            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+            using (var client = new WebClient())
             {
-                totalRequests++;
-                watch = new Stopwatch();
-                watch.Start();
-
-                try
+                totalRequests = 0;
+                // Do the following until a key is pressed
+                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
                 {
-                    // Manage the call according to the whole policy wrap.
-                    string response = policyWrap.Execute(() => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests));
+                    totalRequests++;
+                    watch = new Stopwatch();
+                    watch.Start();
 
-                    watch.Stop();
+                    try
+                    {
+                        // Manage the call according to the whole policy wrap.
+                        string response =
+                            policyWrap.Execute(() => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests));
 
-                    // Display the response message on the console
-                    progress.Report(ProgressWithMessage("Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                        watch.Stop();
 
-                    eventualSuccesses++;
+                        // Display the response message on the console
+                        progress.Report(ProgressWithMessage("Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+
+                        eventualSuccesses++;
+                    }
+                    catch (Exception e) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
+                    {
+                        throw new InvalidOperationException("Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.", e);
+                    }
+
+                    // Wait half second
+                    Thread.Sleep(500);
                 }
-                catch (Exception e) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
-                {
-                    throw new InvalidOperationException("Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.", e);
-                }
-
-                // Wait half second
-                Thread.Sleep(500);
             }
 
         }

@@ -45,39 +45,39 @@ namespace PollyDemos.Async
 
             });
 
-            var client = new HttpClient();
-
-            totalRequests = 0;
-            // Do the following until a key is pressed
-            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+            using (var client = new HttpClient())
             {
-                totalRequests++;
-
-                try
+                totalRequests = 0;
+                // Do the following until a key is pressed
+                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
                 {
-                    // Retry the following call according to the policy - 3 times.
-                    await policy.ExecuteAsync(async () =>
+                    totalRequests++;
+
+                    try
                     {
-                        // This code is executed within the Policy 
+                        // Retry the following call according to the policy - 3 times.
+                        await policy.ExecuteAsync(async () =>
+                        {
+                            // This code is executed within the Policy 
 
-                        // Make a request and get a response
-                        string msg = await client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                            // Make a request and get a response
+                            string msg = await client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
 
-                        // Display the response message on the console
-                        progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
-                        eventualSuccesses++;
-                    });
+                            // Display the response message on the console
+                            progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
+                            eventualSuccesses++;
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
+                        eventualFailures++;
+                    }
+
+                    // Wait half second
+                    await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                 }
-                catch (Exception e)
-                {
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
-                    eventualFailures++;
-                }
-
-                // Wait half second
-                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             }
-
         }
 
         public static Statistic[] LatestStatistics => new[]

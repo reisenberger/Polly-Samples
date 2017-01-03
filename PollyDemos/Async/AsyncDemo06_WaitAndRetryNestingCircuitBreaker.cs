@@ -81,61 +81,66 @@ namespace PollyDemos.Async
                     onHalfOpen: () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta))
                 );
 
-            var client = new HttpClient();
-
-            totalRequests = 0;
-            // Do the following until a key is pressed
-            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+            using (var client = new HttpClient())
             {
-                totalRequests++;
-                Stopwatch watch = new Stopwatch();
-                watch.Start();
+                totalRequests = 0;
 
-                try
+                // Do the following until a key is pressed
+                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
                 {
-                    // Retry the following call according to the policy - 3 times.
-                    await waitAndRetryPolicy.ExecuteAsync(async token =>
+                    totalRequests++;
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();
+
+                    try
                     {
-                        // This code is executed within the waitAndRetryPolicy 
+                        // Retry the following call according to the policy - 3 times.
+                        await waitAndRetryPolicy.ExecuteAsync(async token =>
+                        {
+                            // This code is executed within the waitAndRetryPolicy 
 
-                        string response = await circuitBreakerPolicy.ExecuteAsync<String>(() => // Note how we can also Execute() a Func<TResult> and pass back the value.
-                                {
-                                    // This code is executed within the circuitBreakerPolicy 
+                            string response = await circuitBreakerPolicy.ExecuteAsync<String>(
+                                        () => // Note how we can also Execute() a Func<TResult> and pass back the value.
+                                        {
+                                            // This code is executed within the circuitBreakerPolicy 
 
-                                    // Make a request and get a response
-                                    return client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
-                                });
+                                            // Make a request and get a response
+                                            return client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                                        });
 
+                            watch.Stop();
+
+                            // Display the response message on the console
+                            progress.Report(ProgressWithMessage("Response : " + response
+                                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+
+                            eventualSuccesses++;
+                        }, cancellationToken);
+                    }
+                    catch (BrokenCircuitException b)
+                    {
                         watch.Stop();
 
-                        // Display the response message on the console
-                        progress.Report(ProgressWithMessage("Response : " + response
-                            + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                        progress.Report(
+                            ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
+                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
 
-                        eventualSuccesses++;
-                    }, cancellationToken);
+                        eventualFailuresDueToCircuitBreaking++;
+                    }
+                    catch (Exception e)
+                    {
+                        watch.Stop();
+
+                        progress.Report(
+                            ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
+                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+
+                        eventualFailuresForOtherReasons++;
+                    }
+
+                    // Wait half second
+                    await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                 }
-                catch (BrokenCircuitException b)
-                {
-                    watch.Stop();
-
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
-
-                    eventualFailuresDueToCircuitBreaking++;
-                }
-                catch (Exception e)
-                {
-                    watch.Stop();
-
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
-
-                    eventualFailuresForOtherReasons++;
-                }
-
-                // Wait half second
-                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             }
 
         }

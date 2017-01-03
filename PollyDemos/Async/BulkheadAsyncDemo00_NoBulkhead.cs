@@ -50,84 +50,94 @@ namespace PollyDemos.Async
             const int callerParallelCapacity = 8; // (artificially low - but easier to follow, to illustrate principle)
             var limitedCapacityCaller = new LimitedConcurrencyLevelTaskScheduler(callerParallelCapacity);
 
-            var client = new HttpClient();
             var rand = new Random();
             totalRequests = 0;
 
             IList<Task> tasks = new List<Task>();
             CancellationTokenSource internalCancellationTokenSource = new CancellationTokenSource();
-            CancellationToken combinedToken = CancellationTokenSource.CreateLinkedTokenSource(
-                externalCancellationToken, internalCancellationTokenSource.Token).Token;
+            CancellationToken combinedToken = CancellationTokenSource.CreateLinkedTokenSource(externalCancellationToken, internalCancellationTokenSource.Token).Token;
 
-            while (!Console.KeyAvailable && !externalCancellationToken.IsCancellationRequested)
+            using (var client = new HttpClient())
             {
-                totalRequests++;
 
-                // Randomly make either 'good' or 'faulting' calls.
-                if (rand.Next(0, 2) == 0)
+                while (!Console.KeyAvailable && !externalCancellationToken.IsCancellationRequested)
                 {
-                    goodRequestsMade++;
-                    // Call 'good' endpoint.
-                    tasks.Add(Task.Factory.StartNew(async j =>
+                    totalRequests++;
+
+                    // Randomly make either 'good' or 'faulting' calls.
+                    if (rand.Next(0, 2) == 0)
                     {
+                        goodRequestsMade++;
+                        // Call 'good' endpoint.
+                        tasks.Add(Task.Factory.StartNew(async j =>
+                                {
 
-                        try
-                        {
-                            // Make a request and get a response, from the good endpoint
-                            string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledgood/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
-                            if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
+                                    try
+                                    {
+                                        // Make a request and get a response, from the good endpoint
+                                        string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledgood/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
+                                        if (!combinedToken.IsCancellationRequested)
+                                            progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
 
-                            goodRequestsSucceeded++;
-                        }
-                        catch (Exception e)
-                        {
-                            if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Request " + j + " eventually failed with: " + e.Message, Color.Red));
+                                        goodRequestsSucceeded++;
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        if (!combinedToken.IsCancellationRequested)
+                                            progress.Report(ProgressWithMessage("Request " + j + " eventually failed with: " + e.Message, Color.Red));
 
-                            goodRequestsFailed++;
-                        }
-                    }, totalRequests, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
-                    );
+                                        goodRequestsFailed++;
+                                    }
+                                }, totalRequests, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller)
+                                .Unwrap()
+                        );
 
-                }
-                else
-                {
-                    faultingRequestsMade++;
-                    // call 'faulting' endpoint.
-                    tasks.Add(Task.Factory.StartNew(async j =>
+                    }
+                    else
                     {
-                        try
-                        {
-                            // Make a request and get a response, from the faulting endpoint
-                            string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledfaulting/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
-                            if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
+                        faultingRequestsMade++;
+                        // call 'faulting' endpoint.
+                        tasks.Add(Task.Factory.StartNew(async j =>
+                                {
+                                    try
+                                    {
+                                        // Make a request and get a response, from the faulting endpoint
+                                        string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledfaulting/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
+                                        if (!combinedToken.IsCancellationRequested)
+                                            progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
 
-                            faultingRequestsSucceeded++;
-                        }
-                        catch (Exception e)
-                        {
-                            if (!combinedToken.IsCancellationRequested) progress.Report(ProgressWithMessage("Request " + j + " eventually failed with: " + e.Message, Color.Red));
+                                        faultingRequestsSucceeded++;
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        if (!combinedToken.IsCancellationRequested)
+                                            progress.Report(ProgressWithMessage("Request " + j + " eventually failed with: " + e.Message, Color.Red));
 
-                            faultingRequestsFailed++;
-                        }
-                    }, totalRequests, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
-                    );
+                                        faultingRequestsFailed++;
+                                    }
+                                }, totalRequests, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller)
+                                .Unwrap()
+                        );
 
+                    }
+
+                    progress.Report(ProgressWithMessage($"Total requests: requested {totalRequests:00}, ", Color.White));
+                    progress.Report(ProgressWithMessage($"    Good endpoint: requested {goodRequestsMade:00}, ", Color.White));
+                    progress.Report(ProgressWithMessage($"Good endpoint:succeeded {goodRequestsSucceeded:00}, ", Color.Green));
+                    progress.Report(ProgressWithMessage($"Good endpoint:pending {goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed:00}, ", Color.Yellow));
+                    progress.Report(ProgressWithMessage($"Good endpoint:failed {goodRequestsFailed:00}.", Color.Red));
+
+                    progress.Report(ProgressWithMessage(String.Empty));
+                    progress.Report(ProgressWithMessage($"Faulting endpoint: requested {faultingRequestsMade:00}, ", Color.White));
+                    progress.Report(ProgressWithMessage($"Faulting endpoint:succeeded {faultingRequestsSucceeded:00}, ", Color.Green));
+                    progress.Report(ProgressWithMessage($"Faulting endpoint:pending {faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed:00}, ", Color.Yellow));
+                    progress.Report(ProgressWithMessage($"Faulting endpoint:failed {faultingRequestsFailed:00}.", Color.Red));
+                    progress.Report(ProgressWithMessage(String.Empty));
+
+                    // Wait briefly
+                    await Task.Delay(TimeSpan.FromSeconds(0.1), externalCancellationToken);
                 }
-
-                progress.Report(ProgressWithMessage($"Total requests: requested {totalRequests:00}, ", Color.White)); progress.Report(ProgressWithMessage($"    Good endpoint: requested {goodRequestsMade:00}, ", Color.White));
-                progress.Report(ProgressWithMessage($"Good endpoint:succeeded {goodRequestsSucceeded:00}, ", Color.Green));
-                progress.Report(ProgressWithMessage($"Good endpoint:pending {goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed:00}, ", Color.Yellow));
-                progress.Report(ProgressWithMessage($"Good endpoint:failed {goodRequestsFailed:00}.", Color.Red));
-
-                progress.Report(ProgressWithMessage(String.Empty));
-                progress.Report(ProgressWithMessage($"Faulting endpoint: requested {faultingRequestsMade:00}, ", Color.White));
-                progress.Report(ProgressWithMessage($"Faulting endpoint:succeeded {faultingRequestsSucceeded:00}, ", Color.Green));
-                progress.Report(ProgressWithMessage($"Faulting endpoint:pending {faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed:00}, ", Color.Yellow));
-                progress.Report(ProgressWithMessage($"Faulting endpoint:failed {faultingRequestsFailed:00}.", Color.Red));
-                progress.Report(ProgressWithMessage(String.Empty));
-
-                // Wait briefly
-                await Task.Delay(TimeSpan.FromSeconds(0.1), externalCancellationToken);
+                
             }   
 
             // Cancel any unstarted and running tasks.

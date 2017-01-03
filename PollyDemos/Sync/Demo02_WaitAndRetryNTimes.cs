@@ -54,37 +54,38 @@ namespace PollyDemos.Sync
 
             });
 
-            var client = new WebClient();
-
-            totalRequests = 0;
-            // Do the following until a key is pressed
-            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+            using (var client = new WebClient())
             {
-                totalRequests++;
-
-                try
+                totalRequests = 0;
+                // Do the following until a key is pressed
+                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
                 {
-                    // Retry the following call according to the policy - 3 times.
-                    policy.Execute(() =>
+                    totalRequests++;
+
+                    try
                     {
-                        // This code is executed within the Policy 
+                        // Retry the following call according to the policy - 3 times.
+                        policy.Execute(() =>
+                        {
+                            // This code is executed within the Policy 
 
-                        // Make a request and get a response
-                        var response = client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests.ToString());
+                            // Make a request and get a response
+                            var response = client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
 
-                        // Display the response message on the console
-                        progress.Report(ProgressWithMessage("Response : " + response, Color.Green));
-                        eventualSuccesses++;
-                    });
+                            // Display the response message on the console
+                            progress.Report(ProgressWithMessage("Response : " + response, Color.Green));
+                            eventualSuccesses++;
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
+                        eventualFailures++;
+                    }
+
+                    // Wait half second
+                    Thread.Sleep(500);
                 }
-                catch (Exception e)
-                {
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
-                    eventualFailures++;
-                }
-
-                // Wait half second
-                Thread.Sleep(500);
             }
 
         }

@@ -77,60 +77,60 @@ namespace PollyDemos.Sync
             // New for demo07: combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap.
             PolicyWrap policyWrap = Policy.Wrap(waitAndRetryPolicy, circuitBreakerPolicy);
 
-            var client = new WebClient();
-
-            totalRequests = 0;
-            // Do the following until a key is pressed
-            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+            using (var client = new WebClient())
             {
-                totalRequests++;
-                Stopwatch watch = new Stopwatch();
-                watch.Start();
-
-                try
+                totalRequests = 0;
+                // Do the following until a key is pressed
+                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
                 {
-                    // Retry the following call according to the policy wrap
-                    string response = policyWrap.Execute<String>(() => 
-                            {
-                                // This code is executed through both policies in the wrap: WaitAndRetry outer, then CircuitBreaker inner.  Demo 06 shows a broken-out version of what this is equivalent to.
+                    totalRequests++;
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();
 
-                                return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
-                            });
+                    try
+                    {
+                        // Retry the following call according to the policy wrap
+                        string response = policyWrap.Execute<String>(() =>
+                        {
+                            // This code is executed through both policies in the wrap: WaitAndRetry outer, then CircuitBreaker inner.  Demo 06 shows a broken-out version of what this is equivalent to.
 
-                    // Without the extra comments in the anonymous method { } above, it could even be as concise as this:
-                    // string msg = policyWrap.Execute(() => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i));
+                            return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                        });
 
-                    watch.Stop();
+                        // Without the extra comments in the anonymous method { } above, it could even be as concise as this:
+                        // string msg = policyWrap.Execute(() => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i));
 
-                    // Display the response message on the console
-                    progress.Report(ProgressWithMessage("Response : " + response
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                        watch.Stop();
 
-                    eventualSuccesses++;
+                        // Display the response message on the console
+                        progress.Report(ProgressWithMessage("Response : " + response
+                                                            + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+
+                        eventualSuccesses++;
+                    }
+                    catch (BrokenCircuitException b)
+                    {
+                        watch.Stop();
+
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
+                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+
+                        eventualFailuresDueToCircuitBreaking++;
+                    }
+                    catch (Exception e)
+                    {
+                        watch.Stop();
+
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
+                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+
+                        eventualFailuresForOtherReasons++;
+                    }
+
+                    // Wait half second
+                    Thread.Sleep(500);
                 }
-                catch (BrokenCircuitException b)
-                {
-                    watch.Stop();
-
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
-
-                    eventualFailuresDueToCircuitBreaking++;
-                }
-                catch (Exception e)
-                {
-                    watch.Stop();
-
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
-
-                    eventualFailuresForOtherReasons++;
-                }
-
-                // Wait half second
-                Thread.Sleep(500);
             }
-
         }
 
         public static Statistic[] LatestStatistics => new[]

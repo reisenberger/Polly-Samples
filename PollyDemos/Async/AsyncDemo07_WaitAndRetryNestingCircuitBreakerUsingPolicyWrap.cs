@@ -77,57 +77,57 @@ namespace PollyDemos.Async
             // New for demo07: combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap.
             PolicyWrap policyWrap = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
 
-            var client = new HttpClient();
-
-            totalRequests = 0;
-            // Do the following until a key is pressed
-            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+            using (var client = new HttpClient())
             {
-                totalRequests++;
-                Stopwatch watch = new Stopwatch();
-                watch.Start();
-
-                try
+                totalRequests = 0;
+                // Do the following until a key is pressed
+                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
                 {
-                    // Retry the following call according to the policy wrap
-                    string response = await policyWrap.ExecuteAsync<String>(ct =>
+                    totalRequests++;
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();
+
+                    try
                     {
-                        // This code is executed through both policies in the wrap: WaitAndRetry outer, then CircuitBreaker inner.  Demo 06 shows a broken-out version of what this is equivalent to.
+                        // Retry the following call according to the policy wrap
+                        string response = await policyWrap.ExecuteAsync<String>(ct =>
+                        {
+                            // This code is executed through both policies in the wrap: WaitAndRetry outer, then CircuitBreaker inner.  Demo 06 shows a broken-out version of what this is equivalent to.
 
-                        return client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
-                    }, cancellationToken);
+                            return client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                        }, cancellationToken);
 
-                    watch.Stop();
+                        watch.Stop();
 
-                    // Display the response message on the console
-                    progress.Report(ProgressWithMessage("Response : " + response
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                        // Display the response message on the console
+                        progress.Report(ProgressWithMessage("Response : " + response
+                                                            + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
 
-                    eventualSuccesses++;
+                        eventualSuccesses++;
+                    }
+                    catch (BrokenCircuitException b)
+                    {
+                        watch.Stop();
+
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
+                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+
+                        eventualFailuresDueToCircuitBreaking++;
+                    }
+                    catch (Exception e)
+                    {
+                        watch.Stop();
+
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
+                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+
+                        eventualFailuresForOtherReasons++;
+                    }
+
+                    // Wait half second
+                    await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                 }
-                catch (BrokenCircuitException b)
-                {
-                    watch.Stop();
-
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
-
-                    eventualFailuresDueToCircuitBreaking++;
-                }
-                catch (Exception e)
-                {
-                    watch.Stop();
-
-                    progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
-                        + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
-
-                    eventualFailuresForOtherReasons++;
-                }
-
-                // Wait half second
-                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             }
-
         }
 
         public static Statistic[] LatestStatistics => new[]

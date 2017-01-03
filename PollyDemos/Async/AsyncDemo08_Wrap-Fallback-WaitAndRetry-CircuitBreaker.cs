@@ -49,7 +49,6 @@ namespace PollyDemos.Async
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(String.Empty));
 
-            var client = new HttpClient();
             Stopwatch watch = null;
 
             // Define our waitAndRetry policy: keep retrying with 200ms gaps.
@@ -119,34 +118,38 @@ namespace PollyDemos.Async
             // For info: Equivalent to: PolicyWrap<String> policyWrap = Policy.Wrap(fallbackForAnyException, fallbackForCircuitBreaker, waitAndRetryPolicy, circuitBreakerPolicy);
 
             totalRequests = 0;
-            // Do the following until a key is pressed
-            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+
+            using (var client = new HttpClient())
             {
-                totalRequests++;
-                watch = new Stopwatch();
-                watch.Start();
-
-                try
+                // Do the following until a key is pressed
+                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
                 {
-                    // Manage the call according to the whole policy wrap
-                    string response = await policyWrap.ExecuteAsync(ct => client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests), cancellationToken);
+                    totalRequests++;
+                    watch = new Stopwatch();
+                    watch.Start();
 
-                    watch.Stop();
+                    try
+                    {
+                        // Manage the call according to the whole policy wrap
+                        string response = await policyWrap.ExecuteAsync(ct =>
+                                        client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests), cancellationToken);
 
-                    // Display the response message on the console
-                    progress.Report(ProgressWithMessage("Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                        watch.Stop();
 
-                    eventualSuccesses++;
+                        // Display the response message on the console
+                        progress.Report(ProgressWithMessage("Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+
+                        eventualSuccesses++;
+                    }
+                    catch (Exception e) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
+                    {
+                        throw new InvalidOperationException("Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.", e);
+                    }
+
+                    // Wait half second
+                    await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                 }
-                catch (Exception e) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
-                {
-                    throw new InvalidOperationException("Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.", e);
-                }
-
-                // Wait half second
-                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             }
-
         }
 
         public static Statistic[] LatestStatistics => new[]
