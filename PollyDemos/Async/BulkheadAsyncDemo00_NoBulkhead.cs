@@ -24,7 +24,7 @@ namespace PollyDemos.Async
     /// Watch the number of 'pending' calls to the good endpoint eventually start to climb,
     /// as the faulting calls saturate all resource in the caller.
     /// </summary>
-    public static class BulkheadAsyncDemo00_NoBulkhead
+    public class BulkheadAsyncDemo00_NoBulkhead
     {
 
         // Track the number of 'good' and 'faulting' requests made, succeeded and failed.
@@ -37,7 +37,7 @@ namespace PollyDemos.Async
         static int faultingRequestsSucceeded = 0;
         static int faultingRequestsFailed = 0;
 
-        public static async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
         {
             if (externalCancellationToken == null) throw new ArgumentNullException(nameof(externalCancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

@@ -16,14 +16,14 @@ namespace PollyDemos.Async
     /// But we kind-a had to guess how many retries would be enough before the server responded again ...
     /// (and we're hammering that server with retries)
     /// </summary>
-    public static class AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries
+    public class AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

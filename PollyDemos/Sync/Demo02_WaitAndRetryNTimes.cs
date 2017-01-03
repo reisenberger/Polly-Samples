@@ -15,14 +15,14 @@ namespace PollyDemos.Sync
     /// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
     /// So we still fail some calls.
     /// </summary>
-    public static class Demo02_WaitAndRetryNTimes
+    public class Demo02_WaitAndRetryNTimes
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

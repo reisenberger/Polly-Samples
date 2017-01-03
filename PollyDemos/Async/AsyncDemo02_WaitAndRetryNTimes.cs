@@ -16,14 +16,14 @@ namespace PollyDemos.Async
     /// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
     /// So we still fail some calls.
     /// </summary>
-    public static class AsyncDemo02_WaitAndRetryNTimes
+    public class AsyncDemo02_WaitAndRetryNTimes
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

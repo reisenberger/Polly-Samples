@@ -20,14 +20,14 @@ namespace PollyDemos.Async
     /// ... What if the underlying system was totally down tho?  
     /// ... Keeping trying forever would be counterproductive (so, see Demo06)
     /// </summary>
-    public static class AsyncDemo05_WaitAndRetryWithExponentialBackoff
+    public class AsyncDemo05_WaitAndRetryWithExponentialBackoff
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

@@ -21,7 +21,7 @@ namespace PollyDemos.Async
     /// The operation is identical to Demo06.  
     /// The code demonstrates how using the PolicyWrap makes your combined-Policy-strategy more concise, at the point of execution.
     /// </summary>
-    public static class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
+    public class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -29,7 +29,7 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

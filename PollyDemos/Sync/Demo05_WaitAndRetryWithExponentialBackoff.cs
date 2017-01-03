@@ -19,14 +19,14 @@ namespace PollyDemos.Sync
     /// ... What if the underlying system was totally down tho?  
     /// ... Keeping trying forever would be counterproductive (so, see Demo06)
     /// </summary>
-    public static class Demo05_WaitAndRetryWithExponentialBackoff
+    public class Demo05_WaitAndRetryWithExponentialBackoff
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

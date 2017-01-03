@@ -28,7 +28,7 @@ namespace PollyDemos.Async
     /// Note how breaker gives underlying system time to recover ...
     /// ... by the time circuit closes again, underlying system has recovered!
     /// </summary>
-    public static class AsyncDemo06_WaitAndRetryNestingCircuitBreaker
+    public class AsyncDemo06_WaitAndRetryNestingCircuitBreaker
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -36,7 +36,7 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

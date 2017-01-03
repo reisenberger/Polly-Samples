@@ -11,14 +11,14 @@ namespace PollyDemos.Async
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// </summary>
-    public static class AsyncDemo00_NoPolicy
+    public class AsyncDemo00_NoPolicy
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

@@ -15,14 +15,14 @@ namespace PollyDemos.Async
     /// Observations: There's no wait among these retries.  Can be appropriate sometimes.  
     /// In this case, no wait hasn't given underlying system time to recover, so calls still fail despite retries.
     /// </summary>
-    public static class AsyncDemo01_RetryNTimes
+    public class AsyncDemo01_RetryNTimes
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

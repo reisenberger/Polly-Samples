@@ -24,7 +24,7 @@ namespace PollyDemos.Async
     /// - a fallback policy then provides substitute message for the user
     /// - otherwise similar to demo08.
     /// </summary>
-    public static class AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry
+    public class AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -32,7 +32,7 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToTimeout;
         private static int eventualFailuresForOtherReasons;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

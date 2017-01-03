@@ -28,7 +28,7 @@ namespace PollyDemos.Async
     /// 
     /// Bulkheads: making sure one fault doesn't sink the whole ship!
     /// </summary>
-    public static class BulkheadAsyncDemo01_WithBulkheads
+    public class BulkheadAsyncDemo01_WithBulkheads
     {
 
         // Track the number of 'good' and 'faulting' requests made, succeeded and failed.
@@ -41,7 +41,7 @@ namespace PollyDemos.Async
         static int faultingRequestsSucceeded = 0;
         static int faultingRequestsFailed = 0;
 
-        public static async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
         {
             if (externalCancellationToken == null) throw new ArgumentNullException(nameof(externalCancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

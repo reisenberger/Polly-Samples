@@ -24,7 +24,7 @@ namespace PollyDemos.Async
     /// - onFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
     /// - also demonstrates how you can use the same kind of policy (Fallback in this case) twice (or more) in a wrap.
     /// </summary>
-    public static class AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker
+    public class AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker
     {
         private static int totalRequests;
         private static int eventualSuccesses;
@@ -32,7 +32,7 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));

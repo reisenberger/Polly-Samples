@@ -18,14 +18,14 @@ namespace PollyDemos.Async
     /// Imagine if lots of clients were doing that simultaneously
     ///  - could just increase load on an already-struggling server!
     /// </summary>
-    public static class AsyncDemo04_WaitAndRetryForever
+    public class AsyncDemo04_WaitAndRetryForever
     {
         private static int totalRequests;
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
 
-        public static async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
