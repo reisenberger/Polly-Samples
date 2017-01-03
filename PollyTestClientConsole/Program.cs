@@ -74,8 +74,8 @@ namespace PollyTestClientConsole
             // Bulkhead demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            //BulkheadAsyncDemo00_NoBulkhead().ExecuteAsync(cancellationToken, progress).Wait();
-            //BulkheadAsyncDemo01_WithBulkheads().ExecuteAsync(cancellationToken, progress).Wait();
+            //new BulkheadAsyncDemo00_NoBulkhead().ExecuteAsync(cancellationToken, progress).Wait();
+            //new BulkheadAsyncDemo01_WithBulkheads().ExecuteAsync(cancellationToken, progress).Wait();
 
 
             // Keep the console open.
