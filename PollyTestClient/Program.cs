@@ -4,7 +4,8 @@ using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 using PollyTestClient.Output;
-using PollyTestClient.Samples;
+using PollyTestClient.Samples.Sync;
+using PollyTestClient.Samples.Async;
 
 namespace PollyTestClient
 {
