@@ -8,7 +8,7 @@ using Polly.CircuitBreaker;
 using Polly.Wrap;
 using PollyTestClient.Output;
 
-namespace PollyTestClient.Samples
+namespace PollyTestClient.Samples.Async
 {
     /// <summary>
     /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.

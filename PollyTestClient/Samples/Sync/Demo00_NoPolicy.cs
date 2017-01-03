@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Threading;
 using PollyTestClient.Output;
 
-namespace PollyTestClient.Samples
+namespace PollyTestClient.Samples.Sync
 {
     /// <summary>
     /// Uses no policy.  Demonstrates behaviour of 'faulting server' we are testing against.

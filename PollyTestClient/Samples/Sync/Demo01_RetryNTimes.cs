@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Threading;
 using PollyTestClient.Output;
 
-namespace PollyTestClient.Samples
+namespace PollyTestClient.Samples.Sync
 {
     /// <summary>
     /// Demonstrates the Retry policy coming into action.

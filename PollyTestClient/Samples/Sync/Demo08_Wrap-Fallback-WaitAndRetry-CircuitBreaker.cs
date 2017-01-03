@@ -11,7 +11,7 @@ using Polly.Retry;
 using Polly.Wrap;
 using PollyTestClient.Output;
 
-namespace PollyTestClient.Samples
+namespace PollyTestClient.Samples.Sync
 {
     /// <summary>
     /// Demonstrates a PolicyWrap including two Fallback policies (for different exceptions), WaitAndRetry and CircuitBreaker.

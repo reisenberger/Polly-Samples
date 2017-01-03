@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PollyTestClient.Output;
 
-namespace PollyTestClient.Samples
+namespace PollyTestClient.Samples.Sync
 {
     /// <summary>
     /// Demonstrates the WaitAndRetryForever policy.

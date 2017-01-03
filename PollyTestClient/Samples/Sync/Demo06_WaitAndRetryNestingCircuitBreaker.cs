@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Polly.CircuitBreaker;
 using PollyTestClient.Output;
 
-namespace PollyTestClient.Samples
+namespace PollyTestClient.Samples.Sync
 {
     /// <summary>
     /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.

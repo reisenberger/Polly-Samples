@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PollyTestClient.Output;
 
-namespace PollyTestClient.Samples
+namespace PollyTestClient.Samples.Async
 {
     /// <summary>
     /// Demonstrates the WaitAndRetry policy.
