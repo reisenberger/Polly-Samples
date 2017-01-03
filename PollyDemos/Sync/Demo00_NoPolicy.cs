@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Sync
+namespace PollyDemos.Sync
 {
     /// <summary>
     /// Uses no policy.  Demonstrates behaviour of 'faulting server' we are testing against.

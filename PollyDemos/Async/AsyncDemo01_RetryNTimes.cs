@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Async
+namespace PollyDemos.Async
 {
     /// <summary>
     /// Demonstrates the Retry policy coming into action.

@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Async
+namespace PollyDemos.Async
 {
     /// <summary>
     /// Uses no policy.  Demonstrates behaviour of 'faulting server' we are testing against.

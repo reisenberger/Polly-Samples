@@ -9,7 +9,7 @@ using Polly.Timeout;
 using Polly.Wrap;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Sync
+namespace PollyDemos.Sync
 {
     /// <summary>
     /// Demonstrates a PolicyWrap including Fallback, Timeout and WaitAndRetry.

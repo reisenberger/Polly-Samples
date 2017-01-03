@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Async
+namespace PollyDemos.Async
 {
     /// <summary>
     /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.

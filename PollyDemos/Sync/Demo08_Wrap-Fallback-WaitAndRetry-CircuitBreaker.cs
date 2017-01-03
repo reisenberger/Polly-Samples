@@ -9,7 +9,7 @@ using Polly.Retry;
 using Polly.Wrap;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Sync
+namespace PollyDemos.Sync
 {
     /// <summary>
     /// Demonstrates a PolicyWrap including two Fallback policies (for different exceptions), WaitAndRetry and CircuitBreaker.

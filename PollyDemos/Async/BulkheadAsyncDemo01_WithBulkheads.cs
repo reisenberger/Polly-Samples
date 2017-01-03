@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Async
+namespace PollyDemos.Async
 {
     /// <summary>
     /// Same scenario as previous demo:

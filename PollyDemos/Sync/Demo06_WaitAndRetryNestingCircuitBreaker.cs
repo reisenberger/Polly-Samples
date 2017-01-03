@@ -6,7 +6,7 @@ using System.Threading;
 using Polly.CircuitBreaker;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Samples.Sync
+namespace PollyDemos.Sync
 {
     /// <summary>
     /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.
