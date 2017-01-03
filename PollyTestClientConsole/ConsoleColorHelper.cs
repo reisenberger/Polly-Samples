@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.OutputHelpers
+namespace PollyTestClientConsole
 {
-
     public static class ConsoleColorHelper
     {
         public static ConsoleColor ToConsoleColor(this Color color)

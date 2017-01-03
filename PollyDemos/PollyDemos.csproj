@@ -54,7 +54,6 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="OutputHelpers\Color.cs" />
     <Compile Include="OutputHelpers\ColoredMessage.cs" />
-    <Compile Include="OutputHelpers\ConsoleColorHelper.cs" />
     <Compile Include="OutputHelpers\DemoProgress.cs" />
     <Compile Include="OutputHelpers\Statistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
