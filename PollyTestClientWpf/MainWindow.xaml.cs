@@ -225,7 +225,7 @@ namespace PollyTestClientWpf
                     Statistic statistic = stats[i];
                     label.Content = statistic.Description;
                     statBox.Foreground = statistic.Color.ToBrushColor();
-                    statBox.Text = String.Format($"{statistic.Value:000}");
+                    statBox.Text = statistic.Value.ToString().PadLeft(3);
                     label.Visibility = Visibility.Visible;
                     statBox.Visibility = Visibility.Visible;
                 }
