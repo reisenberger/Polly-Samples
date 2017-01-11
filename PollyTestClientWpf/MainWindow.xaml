@@ -41,12 +41,17 @@
             <ComboBoxItem Name="Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap">Sync Demo 07: as 06, using PolicyWrap</ComboBoxItem>
             <ComboBoxItem Name="Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker">Sync Demo 08: Fallback, WaitAndRetry, and CircuitBreaker in a PolicyWrap</ComboBoxItem>
             <ComboBoxItem Name="Demo09_Wrap_Fallback_Timeout_WaitAndRetry">Sync Demo 09: Fallback, Timeout and WaitAndRetry, in a PolicyWrap</ComboBoxItem>
-
         </ComboBox>
 
         <TextBox ScrollViewer.VerticalScrollBarVisibility="Auto" Name="Description" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="140,85,-172,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="135" Width="417" FontSize="14"  FontFamily="Consolas" />
         <Label Content="Description" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Width="135" Height="30"  FontSize="12" Padding="10,0,0,0" Margin="0,85,0,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <RichTextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" x:Name="Output" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="10,241,-969,0" VerticalAlignment="Top" Height="389" Width="1344" FontSize="14"  FontFamily="Consolas"/>
+        <RichTextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" x:Name="Output" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="10,241,-969,0" VerticalAlignment="Top" Height="389" Width="1344" FontSize="14"  FontFamily="Consolas">
+            <RichTextBox.Resources>
+                <Style TargetType="{x:Type Paragraph}">
+                <Setter Property="Margin" Value="0"/>
+            </Style>
+            </RichTextBox.Resources>
+        </RichTextBox>
         <Label Content="Output" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Width="135" Height="30"  FontSize="12" Padding="10,0,0,0" Margin="0,222,0,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
     </Grid>
 </Window>
