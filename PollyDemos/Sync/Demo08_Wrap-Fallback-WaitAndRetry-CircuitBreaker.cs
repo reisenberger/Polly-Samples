@@ -121,9 +121,10 @@ namespace PollyDemos.Sync
 
             using (var client = new WebClient())
             {
+                bool internalCancel = false;
                 totalRequests = 0;
                 // Do the following until a key is pressed
-                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+                while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
                     watch = new Stopwatch();
@@ -133,7 +134,7 @@ namespace PollyDemos.Sync
                     {
                         // Manage the call according to the whole policy wrap.
                         string response =
-                            policyWrap.Execute(() => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests));
+                            policyWrap.Execute(ct => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests), cancellationToken);
 
                         watch.Stop();
 
@@ -149,6 +150,13 @@ namespace PollyDemos.Sync
 
                     // Wait half second
                     Thread.Sleep(500);
+
+                    // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
+                    try
+                    {
+                        internalCancel = Console.KeyAvailable;
+                    }
+                    catch { }
                 }
             }
 

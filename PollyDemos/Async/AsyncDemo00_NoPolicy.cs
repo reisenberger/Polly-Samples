@@ -33,10 +33,10 @@ namespace PollyDemos.Async
 
             using (var client = new HttpClient())
             {
-
+                bool internalCancel = false;
                 totalRequests = 0;
                 // Do the following until a key is pressed
-                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+                while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
 
@@ -57,6 +57,13 @@ namespace PollyDemos.Async
 
                     // Wait half second
                     await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
+
+                    // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
+                    try
+                    {
+                        internalCancel = Console.KeyAvailable;
+                    }
+                    catch { }
                 }
             }
         }

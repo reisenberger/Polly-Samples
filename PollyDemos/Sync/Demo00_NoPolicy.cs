@@ -36,8 +36,9 @@ namespace PollyDemos.Sync
             using (var client = new WebClient())
             {
                 totalRequests = 0;
+                bool internalCancel = false;
                 // Do the following until a key is pressed
-                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+                while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
 
@@ -58,6 +59,13 @@ namespace PollyDemos.Sync
 
                     // Wait half second
                     Thread.Sleep(500);
+
+                    // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
+                    try
+                    {
+                        internalCancel = Console.KeyAvailable;
+                    }
+                    catch { }
                 }
             }
         }

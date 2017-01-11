@@ -55,14 +55,15 @@ namespace PollyDemos.Async
             using (var client = new HttpClient())
             {
                 totalRequests = 0;
+                bool internalCancel = false;
                 // Do the following until a key is pressed
-                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+                while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
 
                     try
                     {
-                        // Retry the following call according to the policy - 15 times.
+                        // Retry the following call according to the policy - 20 times.
                         await policy.ExecuteAsync(async token =>
                         {
                             // This code is executed within the Policy 
@@ -83,6 +84,13 @@ namespace PollyDemos.Async
 
                     // Wait half second before the next request.
                     await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
+
+                    // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
+                    try
+                    {
+                        internalCancel = Console.KeyAvailable;
+                    }
+                    catch { }
                 }
             }
         }

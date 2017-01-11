@@ -118,14 +118,15 @@ namespace PollyDemos.Async
             // Added in demo08: we wrap the two fallback policies onto the front of the existing wrap too.  Demonstrates the *instance* wrap syntax. And the fact that the PolicyWrap myResilienceStrategy from above is just another Policy, which can be onward-wrapped too.  
             // With this pattern, you can build an overall resilience strategy programmatically, reusing some common parts (eg PolicyWrap myResilienceStrategy) but varying other parts (eg Fallback) individually for different calls.
             PolicyWrap<String> policyWrap = fallbackForAnyException.WrapAsync(fallbackForCircuitBreaker.WrapAsync(myResilienceStrategy));
-            // For info: Equivalent to: PolicyWrap<String> policyWrap = Policy.Wrap(fallbackForAnyException, fallbackForCircuitBreaker, waitAndRetryPolicy, circuitBreakerPolicy);
+            // For info: Equivalent to: PolicyWrap<String> policyWrap = Policy.WrapAsync(fallbackForAnyException, fallbackForCircuitBreaker, waitAndRetryPolicy, circuitBreakerPolicy);
 
             totalRequests = 0;
 
             using (var client = new HttpClient())
             {
+                bool internalCancel = false;
                 // Do the following until a key is pressed
-                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+                while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
                     watch = new Stopwatch();
@@ -151,6 +152,13 @@ namespace PollyDemos.Async
 
                     // Wait half second
                     await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
+
+                    // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
+                    try
+                    {
+                        internalCancel = Console.KeyAvailable;
+                    }
+                    catch { }
                 }
             }
         }

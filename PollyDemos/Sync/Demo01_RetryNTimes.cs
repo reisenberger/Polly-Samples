@@ -52,17 +52,18 @@ namespace PollyDemos.Sync
 
             using (var client = new WebClient())
             {
-
+                bool internalCancel = false;
                 totalRequests = 0;
                 // Do the following until a key is pressed
-                while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
+                while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
 
                     try
                     {
                         // Retry the following call according to the policy - 3 times.
-                        policy.Execute(() =>
+                        policy.Execute(
+                            ct => // The Execute() overload takes a CancellationToken, but it happens the executed code does not honour it.
                         {
                             // This code is executed within the Policy 
 
@@ -72,8 +73,9 @@ namespace PollyDemos.Sync
                             // Display the response message on the console
                             progress.Report(ProgressWithMessage("Response : " + response, Color.Green));
                             eventualSuccesses++;
-
-                        });
+                        }
+                        , cancellationToken // The cancellationToken passed in to Execute() enables the policy instance to cancel retries, when the token is signalled.
+);
                     }
                     catch (Exception e)
                     {
@@ -83,6 +85,13 @@ namespace PollyDemos.Sync
 
                     // Wait half second
                     Thread.Sleep(500);
+
+                    // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
+                    try
+                    {
+                        internalCancel = Console.KeyAvailable;
+                    }
+                    catch { }
                 }
             }
         }
