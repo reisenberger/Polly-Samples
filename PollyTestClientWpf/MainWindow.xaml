@@ -18,7 +18,7 @@
 
         <Label Content="Choose demo" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="135" Height="30"  FontSize="12" Padding="10,0,0,0" Margin="0,50,0,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
 
-        <ComboBox Name="Demo" HorizontalAlignment="Left" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Width="417" Height="30" Margin="191,50,-223,0" VerticalAlignment="Top" FontSize="16" Foreground="#002C46"  Background="#FFFFFF" FontWeight="Normal">
+        <ComboBox Name="Demo" HorizontalAlignment="Left" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Width="417" Height="30" Margin="191,50,-223,0" VerticalAlignment="Top" FontSize="16" Foreground="#002C46"  Background="#FFFFFF" FontWeight="Normal" SelectionChanged="Demo_OnSelectionChanged">
             <ComboBoxItem Name="AsyncDemo00_NoPolicy">Async demo 00: No policies</ComboBoxItem>
             <ComboBoxItem Name="AsyncDemo01_RetryNTimes">Async demo 01: Retry N times</ComboBoxItem>
             <ComboBoxItem Name="AsyncDemo02_WaitAndRetryNTimes">Async demo 02: WaitAndRetry N times</ComboBoxItem>

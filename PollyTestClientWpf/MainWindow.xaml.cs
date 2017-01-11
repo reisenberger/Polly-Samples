@@ -31,10 +31,13 @@ namespace PollyTestClientWpf
         CancellationTokenSource cancellationSource;
         CancellationToken cancellationToken;
 
+        private static readonly Type[] availableDemoTypes = Assembly.GetAssembly(typeof(DemoBase)).GetTypes().Where(t => t.IsSubclassOf(typeof(DemoBase)) && !t.IsAbstract).ToArray();
+
         readonly object lockObject = new object();
 
-        Statistic[] statistics = new Statistic[0];
-        private const int maxStatisticsToShow = 9;
+        Statistic[] closingStatistics = new Statistic[0];
+
+        private const int MaxStatisticsToShow = 9;
         private const string StatisticBoxPrefix = "Statistic";
         private const string StatisticLabelPrefix = "StatisticLabel";
 
@@ -50,15 +53,18 @@ namespace PollyTestClientWpf
             progress = new Progress<DemoProgress>();
             progress.ProgressChanged += (sender, progressArgs) =>
             {
-                lock (lockObject)
-                {
-                    WriteLineInColor(progressArgs.ColoredMessage.Message, progressArgs.ColoredMessage.Color);
+                WriteLineInColor(progressArgs.ColoredMessage.Message, progressArgs.ColoredMessage.Color);
 
-                    statistics = progressArgs.Statistics;
-                    UpdateStatistics(progressArgs.Statistics);
-                }
+                UpdateStatistics(progressArgs.Statistics);
+
+                closingStatistics = progressArgs.Statistics;
             };
 
+        }
+
+        private static Type GetDemoType(string demoName)
+        {
+            return availableDemoTypes.SingleOrDefault(t => t.Name == demoName);
         }
 
         private void ClearButton_Click()
@@ -84,10 +90,11 @@ namespace PollyTestClientWpf
                 return;
             }
 
-            Type demoType = Assembly.GetAssembly(typeof(DemoBase)).GetTypes().SingleOrDefault(t => t.Name == selectedItem.Name);
+            string demoName = selectedItem.Name;
+            Type demoType = GetDemoType(demoName);
             if (demoType == null)
             {
-                WriteLineInColor($"Unable to identify demo: {selectedItem.Name}", Color.Red);
+                WriteLineInColor($"Unable to identify demo: {demoName}", Color.Red);
                 cancellationSource.Cancel();
             }
             else if (demoType.IsSubclassOf(typeof(SyncDemo)))
@@ -103,7 +110,7 @@ namespace PollyTestClientWpf
                 }
                 if (demoInstance == null)
                 {
-                    WriteLineInColor($"Unable to instantiate demo: {selectedItem.Name}", Color.Red);
+                    WriteLineInColor($"Unable to instantiate demo: {demoName}", Color.Red);
                     cancellationSource.Cancel();
                     return;
                 }
@@ -115,17 +122,17 @@ namespace PollyTestClientWpf
                         {
                             if (t.IsCanceled)
                             {
-                                WriteLineInColor($"Demo was canceled: {selectedItem.Name}", Color.Red);
+                                WriteLineInColor($"Demo was canceled: {demoName}", Color.Red);
                             }
                             else if (t.IsFaulted)
                             {
-                                WriteLineInColor($"Demo {selectedItem.Name} threw exception: {t.Exception.ToString()}", Color.Red);
+                                WriteLineInColor($"Demo {demoName} threw exception: {t.Exception.ToString()}", Color.Red);
                             }
                         }, TaskContinuationOptions.NotOnRanToCompletion);
                 }
                 catch (Exception e)
                 {
-                    WriteLineInColor($"Demo {selectedItem.Name} threw exception: {e}", Color.Red);
+                    WriteLineInColor($"Demo {demoName} threw exception: {e}", Color.Red);
                 }
             }
             else if (demoType.IsSubclassOf(typeof(AsyncDemo)))
@@ -141,7 +148,7 @@ namespace PollyTestClientWpf
                 }
                 if (demoInstance == null)
                 {
-                    WriteLineInColor($"Unable to instantiate demo: {selectedItem.Name}", Color.Red);
+                    WriteLineInColor($"Unable to instantiate demo: {demoName}", Color.Red);
                     cancellationSource.Cancel();
                     return;
                 }
@@ -151,17 +158,17 @@ namespace PollyTestClientWpf
                     {
                         if (t.IsCanceled)
                         {
-                            WriteLineInColor($"Demo was canceled: {selectedItem.Name}", Color.Red);
+                            WriteLineInColor($"Demo was canceled: {demoName}", Color.Red);
                         }
                         else if (t.IsFaulted)
                         {
-                            WriteLineInColor($"Demo {selectedItem.Name} threw exception: {t.Exception.ToString()}", Color.Red);
+                            WriteLineInColor($"Demo {demoName} threw exception: {t.Exception.ToString()}", Color.Red);
                         }
                     }, TaskContinuationOptions.NotOnRanToCompletion);
             }
             else
             {
-                WriteLineInColor($"Unable to identify demo as either sync or async demo: {selectedItem.Name}", Color.Red);
+                WriteLineInColor($"Unable to identify demo as either sync or async demo: {demoName}", Color.Red);
                 cancellationSource.Cancel();
             }
         }
@@ -187,11 +194,11 @@ namespace PollyTestClientWpf
                 return;
             }
 
-            // Output statistics.
-            if (statistics.Any())
+            // Output closing statistics.
+            if (closingStatistics.Any())
             {
-                int longestDescription = statistics.Max(s => s.Description.Length);
-                foreach (Statistic stat in statistics)
+                int longestDescription = closingStatistics.Max(s => s.Description.Length);
+                foreach (Statistic stat in closingStatistics)
                 {
                     WriteLineInColor(stat.Description.PadRight(longestDescription) + ": " + stat.Value, stat.Color);
                 }
@@ -200,13 +207,44 @@ namespace PollyTestClientWpf
             cancellationSource.Dispose();
         }
 
+        private void Demo_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var comboBox = sender as ComboBox;
+
+            string demoName = (comboBox.SelectedItem as ComboBoxItem).Name;
+            Type demoType = GetDemoType(demoName);
+            if (demoType == null)
+            {
+                Description.Text = string.Empty;
+                return;
+            }
+            DemoBase demoInstance;
+            try
+            {
+                demoInstance = Activator.CreateInstance(demoType) as DemoBase;
+            }
+            catch (Exception)
+            {
+                demoInstance = null;
+            }
+            if (demoInstance == null)
+            {
+                Description.Text = string.Empty;
+                return;
+            }
+            Description.Text = demoInstance.Description;
+        }
+
         public void WriteLineInColor(string msg, Color color)
         {
-            TextRange newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
+            lock (lockObject) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
             {
-                Text = msg + "\n"
-            };
-            newText.ApplyPropertyValue(TextElement.ForegroundProperty, color.ToBrushColor());
+                TextRange newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
+                {
+                    Text = msg + "\n"
+                };
+                newText.ApplyPropertyValue(TextElement.ForegroundProperty, color.ToBrushColor());
+            }
 
             Output.ScrollToEnd();
         }
@@ -214,7 +252,7 @@ namespace PollyTestClientWpf
         private void UpdateStatistics(Statistic[] stats)
         {
             int statisticsToShow = stats.Length;
-            for (int i = 0; i < maxStatisticsToShow; i++)
+            for (int i = 0; i < MaxStatisticsToShow; i++)
             {
                 string statSuffix = $"{i:00}";
                 Label label = (Label) this.FindName(StatisticLabelPrefix + statSuffix);

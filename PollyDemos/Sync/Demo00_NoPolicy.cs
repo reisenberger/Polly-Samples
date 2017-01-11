@@ -17,6 +17,8 @@ namespace PollyDemos.Sync
         private static int retries;
         private static int eventualFailures;
 
+        public override string Description => "This demo demonstrates how our faulting server behaves, with no Polly policies in use.";
+
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
