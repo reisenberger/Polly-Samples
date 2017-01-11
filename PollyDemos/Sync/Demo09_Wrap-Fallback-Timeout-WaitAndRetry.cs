@@ -136,10 +136,10 @@ namespace PollyDemos.Sync
         public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
-            new Statistic("Requests which eventually succeeded", eventualSuccesses),
-            new Statistic("Retries made to help achieve success", retries),
-            new Statistic("Requests timed out by timeout policy", eventualFailuresDueToTimeout),
-            new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons),
+            new Statistic("Requests which eventually succeeded", eventualSuccesses, Color.Green),
+            new Statistic("Retries made to help achieve success", retries, Color.Yellow),
+            new Statistic("Requests timed out by timeout policy", eventualFailuresDueToTimeout, Color.Magenta),
+            new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
 
     }

@@ -23,7 +23,7 @@ namespace PollyTestClientWpf
                 case Color.Red:
                     return Brushes.Red;
                 case Color.Yellow:
-                    return Brushes.YellowGreen;
+                    return Brushes.Coral;
                 case Color.Default:
                     return Brushes.Black;
                 default:

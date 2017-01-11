@@ -34,6 +34,9 @@ namespace PollyTestClientWpf
         readonly object lockObject = new object();
 
         Statistic[] statistics = new Statistic[0];
+        private const int maxStatisticsToShow = 9;
+        private const string StatisticBoxPrefix = "Statistic";
+        private const string StatisticLabelPrefix = "StatisticLabel";
 
         private Progress<DemoProgress> progress;
 
@@ -50,7 +53,9 @@ namespace PollyTestClientWpf
                 lock (lockObject)
                 {
                     WriteLineInColor(progressArgs.ColoredMessage.Message, progressArgs.ColoredMessage.Color);
+
                     statistics = progressArgs.Statistics;
+                    UpdateStatistics(progressArgs.Statistics);
                 }
             };
 
@@ -59,6 +64,7 @@ namespace PollyTestClientWpf
         private void ClearButton_Click()
         {
             Output.Document = new FlowDocument();
+            UpdateStatistics(new Statistic[0]);
         }
 
         private void PlayButton_Click()
@@ -205,5 +211,30 @@ namespace PollyTestClientWpf
             Output.ScrollToEnd();
         }
 
+        private void UpdateStatistics(Statistic[] stats)
+        {
+            int statisticsToShow = stats.Length;
+            for (int i = 0; i < maxStatisticsToShow; i++)
+            {
+                string statSuffix = $"{i:00}";
+                Label label = (Label) this.FindName(StatisticLabelPrefix + statSuffix);
+                TextBox statBox = (TextBox) this.FindName(StatisticBoxPrefix + statSuffix);
+
+                if (i < statisticsToShow)
+                {
+                    Statistic statistic = stats[i];
+                    label.Content = statistic.Description;
+                    statBox.Foreground = statistic.Color.ToBrushColor();
+                    statBox.Text = String.Format($"{statistic.Value:000}");
+                    label.Visibility = Visibility.Visible;
+                    statBox.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    label.Visibility = Visibility.Hidden;
+                    statBox.Visibility = Visibility.Hidden;
+                }
+            }
+        }
     }
 }

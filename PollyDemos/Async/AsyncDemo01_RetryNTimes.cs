@@ -86,10 +86,10 @@ namespace PollyDemos.Async
         public override Statistic[] LatestStatistics => new[]
         {
             new Statistic("Total requests made", totalRequests),
-            new Statistic("Requests which eventually succeeded", eventualSuccesses),
-            new Statistic("Retries made to help achieve success", retries),
-            new Statistic("Requests which eventually failed", eventualFailures),
+            new Statistic("Requests which eventually succeeded", eventualSuccesses, Color.Green),
+            new Statistic("Retries made to help achieve success", retries, Color.Yellow),
+            new Statistic("Requests which eventually failed", eventualFailures, Color.Red),
         };
-        
+
     }
 }
