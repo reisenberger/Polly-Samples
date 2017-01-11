@@ -91,12 +91,7 @@ namespace PollyDemos.Sync
                     // Wait half second before the next request.
                     Thread.Sleep(500);
 
-                    // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
-                    try
-                    {
-                        internalCancel = Console.KeyAvailable;
-                    }
-                    catch { }
+                    internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
                 }
             }
         }

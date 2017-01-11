@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Configuration;
 using PollyDemos.OutputHelpers;
 
 namespace PollyDemos
 {
     public abstract class DemoBase
     {
+        private readonly bool terminateDemosByKeyPress = ( ConfigurationManager.AppSettings["TerminateDemosByKeyPress"] ?? String.Empty).Equals(Boolean.TrueString, StringComparison.InvariantCultureIgnoreCase);
+
+        protected bool TerminateDemosByKeyPress => terminateDemosByKeyPress;
+
         public abstract Statistic[] LatestStatistics { get; }
 
         public DemoProgress ProgressWithMessage(string message)
