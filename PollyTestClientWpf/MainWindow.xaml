@@ -12,7 +12,7 @@
             <ColumnDefinition Width="75*"/>
         </Grid.ColumnDefinitions>-->
         <Label Name="Heading" Content="Polly Demos" HorizontalAlignment="Left" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="10,0,0,0" Margin="0,8,0,0" VerticalAlignment="Top" FontSize="28" Foreground="#FFFFFF" Width="315" />
-        <Button Name="PlayButton" Content="Play" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left" Margin="191,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
+        <Button Name="PlayButton" Content="Start" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left" Margin="191,7,0,0" VerticalAlignment="Top" Width="56" Height="38"/>
         <Button Name="StopButton" Content="Stop" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left" Margin="261,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
         <Button x:Name="ClearButton" Content="Clear" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left" Margin="331,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
 

@@ -41,12 +41,23 @@ In all bulkhead demos, the upstream system makes a random mixture of calls to th
   + The faulting stream of calls still backs up.
   + But **the calls to the good endpoint are unaffected - they consistently succeed**, because they are isolated in a separate bulkhead.   
 
-## To run the demos
+## To run the demos (either test client)
 
-+ To start the dummy server, start `PollyTestApp`.  
++ Start the dummy server, by starting `PollyTestApp`.  
 + Be sure the port number for the dummy server in `PollyDemos\Configuration.cs` matches the port on which `PollyTestApp` has started on your machine (in the previous step).
-+ To run a demo, uncomment the demo you wish to run in `PollyDemos\program.cs`.  Then start `PollyDemos`.  
-+ Many Polly policies are about handling exceptions.  If running the demos in debug mode out of Visual Studio and flow is interrupted by Visual Studio breaking on exceptions, consider unchecking the box "Break when this exception type is user-unhandled" in the dialog shown when Visual Studio breaks on an exception.
+
+Then ...
+
+## To run the demos - Console Test Client
+
++ To run a demo, uncomment the demo you wish to run in `PollyTestClientConsole\program.cs`.  Then start `PollyTestClientConsole`.  
++ Many Polly policies are about handling exceptions.  If running the demos in debug mode out of Visual Studio and flow is interrupted by Visual Studio breaking on exceptions, uncheck the box "Break when this exception type is user-unhandled" in the dialog shown when Visual Studio breaks on an exception.
+
+## To run the demos - WPF Test Client
+
++ Start the PollyTestClientWPF application.
++ Start button starts a demo; Stop button stops it; Clear button clears the output. 
++ Many Polly policies are about handling exceptions.  If running the demos in debug mode out of Visual Studio and flow is interrupted by Visual Studio breaking on exceptions, uncheck the box "Break when this exception type is user-unhandled" in the dialog shown when Visual Studio breaks on an exception.
 
 ## Want further information?
 
