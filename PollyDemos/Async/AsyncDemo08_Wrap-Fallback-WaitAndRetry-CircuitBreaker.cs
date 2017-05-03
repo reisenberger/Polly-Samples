@@ -32,6 +32,8 @@ namespace PollyDemos.Async
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
+        public override string Description => "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
+
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
@@ -81,7 +83,7 @@ namespace PollyDemos.Async
             FallbackPolicy<String> fallbackForCircuitBreaker = Policy<String>
                 .Handle<BrokenCircuitException>()
                 .FallbackAsync(
-                    fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [Fallback for broken circuit]",
+                    fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [message substituted by fallback policy]",
                     onFallbackAsync: async b =>
                     {
                         await Task.FromResult(true);

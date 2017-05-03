@@ -29,6 +29,8 @@ namespace PollyDemos.Sync
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
+        public override string Description => "This demonstrates CircuitBreaker (see Demo06), but uses the PolicyWrap syntax to compose the policies nicely. Only the underlying code differs.";
+
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));

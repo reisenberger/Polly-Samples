@@ -23,6 +23,8 @@ namespace PollyDemos.Async
         private static int retries;
         private static int eventualFailures;
 
+        public override string Description => "Compared to previous demo, this demo adds enough waiting and retrying to always ensure success.";
+
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));

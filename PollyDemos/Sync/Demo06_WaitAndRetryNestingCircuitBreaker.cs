@@ -35,6 +35,8 @@ namespace PollyDemos.Sync
         private static int eventualFailuresDueToCircuitBreaking;
         private static int eventualFailuresForOtherReasons;
 
+        public override string Description => "This demonstrates CircuitBreaker.  When an underlying system is completely down or seriously struggling, it can be better to fail fast and not put calls through.";
+
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));

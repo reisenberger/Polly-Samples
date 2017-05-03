@@ -32,6 +32,8 @@ namespace PollyDemos.Sync
         private static int eventualFailuresDueToTimeout;
         private static int eventualFailuresForOtherReasons;
 
+        public override string Description => "Demonstrates introducing a TimeoutPolicy. The TimeoutPolicy will eventually time-out on the retries that WaitAndRetry was orchestrating.  When we timeout, we again use a Fallback policy to substitute a more graceful message.";
+
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));

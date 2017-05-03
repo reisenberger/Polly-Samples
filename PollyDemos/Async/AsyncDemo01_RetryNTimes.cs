@@ -22,6 +22,8 @@ namespace PollyDemos.Async
         private static int retries;
         private static int eventualFailures;
 
+        public override string Description => "This demo demonstrates a first Retry.  It retries three times, immediately.";
+
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));

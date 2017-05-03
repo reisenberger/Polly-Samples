@@ -22,6 +22,8 @@ namespace PollyDemos.Sync
         private static int retries;
         private static int eventualFailures;
 
+        public override string Description => "Compared to previous demo, this demo adds waits between the retries. Not always enough wait to ensure success, tho.";
+
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));

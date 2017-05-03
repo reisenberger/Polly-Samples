@@ -27,6 +27,8 @@ namespace PollyDemos.Async
         private static int retries;
         private static int eventualFailures;
 
+        public override string Description => "This demonstrates exponential backoff.  We have enough retries to ensure success.  But we don't hammer the server so hard: we increase the delay between each try.";
+
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));

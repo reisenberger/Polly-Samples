@@ -20,6 +20,7 @@ namespace PollyDemos.Sync
         private static int eventualSuccesses;
         private static int retries;
         private static int eventualFailures;
+        public override string Description => "This demo demonstrates a first Retry.  It retries three times, immediately.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
