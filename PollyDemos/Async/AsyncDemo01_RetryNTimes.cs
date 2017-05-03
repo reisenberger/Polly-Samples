@@ -17,10 +17,10 @@ namespace PollyDemos.Async
     /// </summary>
     public class AsyncDemo01_RetryNTimes : AsyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailures;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailures;
 
         public override string Description => "This demo demonstrates a first Retry.  It retries three times, immediately.";
 

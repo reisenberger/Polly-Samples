@@ -17,10 +17,10 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo02_WaitAndRetryNTimes : SyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailures;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailures;
 
         public override string Description => "Compared to previous demo, this demo adds waits between the retries. Not always enough wait to ensure success, tho.";
 

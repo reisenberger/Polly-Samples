@@ -26,11 +26,11 @@ namespace PollyDemos.Async
     /// </summary>
     public class AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry : AsyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailuresDueToTimeout;
-        private static int eventualFailuresForOtherReasons;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailuresDueToTimeout;
+        private int eventualFailuresForOtherReasons;
 
         public override string Description => "Demonstrates introducing a TimeoutPolicy. The TimeoutPolicy will eventually time-out on the retries that WaitAndRetry was orchestrating.  When we timeout, we again use a Fallback policy to substitute a more graceful message.";
 

@@ -29,11 +29,11 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo06_WaitAndRetryNestingCircuitBreaker : SyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailuresDueToCircuitBreaking;
-        private static int eventualFailuresForOtherReasons;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailuresDueToCircuitBreaking;
+        private int eventualFailuresForOtherReasons;
 
         public override string Description => "This demonstrates CircuitBreaker.  When an underlying system is completely down or seriously struggling, it can be better to fail fast and not put calls through.";
 

@@ -22,10 +22,10 @@ namespace PollyDemos.Async
     /// </summary>
     public class AsyncDemo05_WaitAndRetryWithExponentialBackoff : AsyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailures;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailures;
 
         public override string Description => "This demonstrates exponential backoff.  We have enough retries to ensure success.  But we don't hammer the server so hard: we increase the delay between each try.";
 

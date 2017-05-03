@@ -20,10 +20,10 @@ namespace PollyDemos.Async
     /// </summary>
     public class AsyncDemo04_WaitAndRetryForever : AsyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailures;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailures;
 
         public override string Description => "This demo also retries enough to always ensure success.  But we haven't had to 'guess' how many retries were necessary.  We just said: wait-and-retry-forever.";
 

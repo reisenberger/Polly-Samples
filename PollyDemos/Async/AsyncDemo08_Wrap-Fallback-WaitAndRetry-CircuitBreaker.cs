@@ -26,11 +26,11 @@ namespace PollyDemos.Async
     /// </summary>
     public class AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker : AsyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailuresDueToCircuitBreaking;
-        private static int eventualFailuresForOtherReasons;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailuresDueToCircuitBreaking;
+        private int eventualFailuresForOtherReasons;
 
         public override string Description => "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
 

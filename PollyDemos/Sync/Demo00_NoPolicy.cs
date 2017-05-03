@@ -12,10 +12,10 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo00_NoPolicy : SyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailures;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailures;
 
         public override string Description => "This demo demonstrates how our faulting server behaves, with no Polly policies in use.";
 

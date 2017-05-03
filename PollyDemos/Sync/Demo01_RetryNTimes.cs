@@ -16,10 +16,10 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo01_RetryNTimes : SyncDemo
     {
-        private static int totalRequests;
-        private static int eventualSuccesses;
-        private static int retries;
-        private static int eventualFailures;
+        private int totalRequests;
+        private int eventualSuccesses;
+        private int retries;
+        private int eventualFailures;
         public override string Description => "This demo demonstrates a first Retry.  It retries three times, immediately.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
