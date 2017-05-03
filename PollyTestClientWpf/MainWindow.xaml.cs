@@ -128,7 +128,7 @@ namespace PollyTestClientWpf
                             {
                                 WriteLineInColor($"Demo {demoName} threw exception: {t.Exception.ToString()}", Color.Red);
                             }
-                        }, TaskContinuationOptions.NotOnRanToCompletion);
+                        }, CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.FromCurrentSynchronizationContext());
                 }
                 catch (Exception e)
                 {
@@ -164,7 +164,7 @@ namespace PollyTestClientWpf
                         {
                             WriteLineInColor($"Demo {demoName} threw exception: {t.Exception.ToString()}", Color.Red);
                         }
-                    }, TaskContinuationOptions.NotOnRanToCompletion);
+                    }, CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.FromCurrentSynchronizationContext());
             }
             else
             {
