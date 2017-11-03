@@ -1,64 +1,71 @@
-﻿using Polly;
+﻿
+using Polly;
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PollyTestClient.Samples
 {
     /// <summary>
-    /// Demonstrates the Retry policy coming into action.
+    /// Demonstrates the WaitAndRetryForever policy.
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// 
-    /// Observations: There's no wait among these retries.  Can be appropriate sometimes.  
-    /// In this case, no wait hasn't given underlying system time to recover, so calls still fail despite retries.
+    /// Observations: We no longer have to guess how many retries are enough.  
+    /// All calls still succeed!  Yay!
+    /// But we're still hammering that underlying server with retries. 
+    /// Imagine if lots of clients were doing that simultaneously
+    ///  - could just increase load on an already-struggling server!
     /// </summary>
-    public static class Demo01_RetryNTimes
+    public static class AsyncDemo04_WaitAndRetryForever
     {
-        public static void Execute()
+        public static async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine(MethodBase.GetCurrentMethod().DeclaringType.Name);
+            Console.WriteLine(typeof(AsyncDemo04_WaitAndRetryForever).Name);
             Console.WriteLine("=======");
 
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
 
-            var client = new WebClient();
+            var client = new HttpClient();
             int eventualSuccesses = 0;
             int retries = 0;
             int eventualFailures = 0;
             // Define our policy:
-            var policy = Policy.Handle<Exception>().Retry(3, (exception, attempt) =>
+            var policy = Policy.Handle<Exception>().WaitAndRetryForeverAsync(
+                sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200), // Wait 200ms between each try.
+                onRetry: (exception, calculatedWaitDuration) => // Capture some info for logging!
             {
                 // This is your new exception handler! 
                 // Tell the user what they've won!
-                ConsoleHelper.WriteLineInColor("Policy logging: " + exception.Message, ConsoleColor.Yellow);
+                ConsoleHelper.WriteLineInColor("Log, then retry: " + exception.Message, ConsoleColor.Yellow);
                 retries++;
 
             });
 
             int i = 0;
             // Do the following until a key is pressed
-            while (!Console.KeyAvailable)
+            while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
             {
                 i++;
 
                 try
                 {
-                    // Retry the following call according to the policy - 3 times.
-                    policy.Execute(() =>
+                    // Retry the following call according to the policy - 15 times.
+                    await policy.ExecuteAsync(async token =>
                     {
                         // This code is executed within the Policy 
 
                         // Make a request and get a response
-                        var msg = client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i.ToString());
+                        string msg = await client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + i);
 
                         // Display the response message on the console
                         ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
                         eventualSuccesses++;
-
-                    });
+                    }, cancellationToken);
                 }
                 catch (Exception e)
                 {
@@ -66,8 +73,8 @@ namespace PollyTestClient.Samples
                     eventualFailures++;
                 }
 
-                // Wait half second
-                Thread.Sleep(500);
+                // Wait half second before the next request.
+                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             }
 
             Console.WriteLine("");
